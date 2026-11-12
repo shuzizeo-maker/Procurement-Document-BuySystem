@@ -2,7 +2,7 @@
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購憑證自動生成系統 v4.4.3</title>
+    <title>採購憑證自動生成系統 v4.4.4</title>
     <!-- CSS 資源 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <script>
-var APP_VERSION = 'v4.4.3', APP_BUILD = '2026-11-12';
+var APP_VERSION = 'v4.4.4', APP_BUILD = '2026-11-12';
 var DEFAULT_MOE_CODE = '144676';   // 預設學校：臺東縣金峰鄉嘉蘭國民小學
 </script>
     <!-- 1. 臺東縣學校資料庫（內建） -->
@@ -276,7 +276,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 <body>
 
 <div class="container-fluid py-4" style="max-width: 1400px;" id="pcMainApp">
-    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.3</span></h3>
+    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.4</span></h3>
 
     <!-- 頁籤導覽列 (Tabs Header) -->
 <!-- 頁籤導覽列 (Tabs Header) -->
@@ -1024,10 +1024,23 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
                         <p class="text-muted small mb-0" id="pdfFileLabel">尚未選擇檔案（建議 15 MB 以內）</p>
                     </div>
                     <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" class="d-none">
-                    <div class="d-flex align-items-center gap-3 mt-3">
-                        <button class="btn btn-warning fw-bold px-4" id="btnAnalyzePdf" disabled>🔍 開始判讀公文</button>
+                    <div class="d-flex align-items-center gap-3 mt-3 flex-wrap">
+                        <button class="btn btn-warning fw-bold px-4" id="btnAnalyzePdf" disabled>🔍 開始判讀公文（需 AI 金鑰）</button>
+                        <button class="btn btn-outline-success fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#pdfManualPanel">🆓 沒有金鑰？用 Gemini 網頁判讀</button>
                         <div id="pdfLoading" class="text-warning-emphasis fw-bold small" style="display:none;">
                             <span class="spinner-border spinner-border-sm me-1"></span><span id="pdfLoadingText">AI 判讀中…</span>
+                        </div>
+                    </div>
+                    <div class="collapse mt-3" id="pdfManualPanel">
+                        <div class="border border-success-subtle rounded p-3 bg-light">
+                            <ol class="small mb-2 ps-3">
+                                <li>按 <button class="btn btn-success btn-sm fw-bold py-0" type="button" id="btnCopyPdfPrompt">📋 複製判讀提示詞</button></li>
+                                <li>打開 <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="fw-bold">Gemini 網頁</a>（用您的 Google 帳號，免費即可），上傳公文 PDF 或圖片，貼上提示詞後送出。</li>
+                                <li>按 Gemini 回覆中程式碼區塊右上角的「複製」，貼到下方，再按「解析並核對」。</li>
+                            </ol>
+                            <textarea id="pdfPasteArea" class="form-control form-control-sm font-monospace mb-2" rows="5" placeholder="把 Gemini 的回覆貼在這裡（{ 開頭、} 結尾的資料）"></textarea>
+                            <button class="btn btn-success btn-sm fw-bold px-3" type="button" id="btnParsePastedPdf">✅ 解析並核對</button>
+                            <span class="form-text small ms-2">公文只會上傳到您自己的 Gemini 帳號；Gemini 免費版的內容可能被 Google 用於改善服務。</span>
                         </div>
                     </div>
                 </div>
@@ -5647,9 +5660,12 @@ function pdfPrompt() {
         '  "period": "計畫期程，例如 115年3月1日至115年12月31日",\n' +
         '  "subsidyUnit": "補助單位",\n' +
         '  "approvedByCategory": { "personnel": 人事費, "business": 業務費, "admin": 行政管理費, "equipment": 設備及投資（資本門） },\n' +
+        '  "fundingMode": "預撥 或 不預撥（公文寫「採不預撥方式」就填 不預撥；沒寫就填空字串）",\n' +
         '  "notes": "判讀時的疑慮或需人工確認之處，簡短中文"\n' +
         '}\n' +
-        '規則：找不到的欄位文字填空字串、數字填 null，不要猜測或編造。金額去掉逗號與「元」。' +
+        '規則：找不到的欄位文字填空字串、數字填 null，不要猜測或編造。金額一律換成阿拉伯數字，例如「新臺幣8萬9,000元整」填 89000。' +
+        '若公文寫「經費來源為資本門」且沒有其他分項，approvedByCategory 的 equipment 填核定總金額、其餘填 0；若只寫經常門而沒有分項金額，四項都填 null。' +
+        '子目代碼照公文寫法，例如「W15125」。事由用公文中的計畫名稱。' +
         (school ? '本校名稱為「' + school + '」；若公文附多校分配表，金額只取本校那一列。' : '') + '\n' +
         '使用繁體中文。';
 }
@@ -5669,10 +5685,17 @@ var PDF_FIELDS = [
 ];
 var PDF_CATS = [['personnel', '人事費'], ['business', '業務費'], ['admin', '行政管理費'], ['equipment', '設備及投資']];
 
+function aiParseAmount(v) {
+    var t = String(v).replace(/[,，\s元整新臺台幣NT$]/g, '');
+    var m = /^(\d+(?:\.\d+)?)萬(\d*)$/.exec(t);
+    if (m) return Math.round(parseFloat(m[1]) * 10000 + (m[2] ? +m[2] : 0));
+    return /^\d+(\.\d+)?$/.test(t) ? Math.round(+t) : null;
+}
 function pdfNormalize(key, v) {
     if (v === null || v === undefined) return '';
     v = String(v).trim();
-    if (key === 'approvedAmt' || key.indexOf('cat:') === 0) { var n = v.replace(/[,，元\s]/g, ''); return /^\d+(\.\d+)?$/.test(n) ? String(Math.round(+n)) : ''; }
+    if (key === 'approvedAmt' || key.indexOf('cat:') === 0) { var n = aiParseAmount(v); return n === null ? '' : String(n); }
+    if (key === 'fundingMode') return /不預撥/.test(v) ? '不預撥' : (/預撥/.test(v) ? '預撥' : '');
     if (key === 'incomingDate') {
         var m = /^(\d{2,3})[年\/.-](\d{1,2})[月\/.-](\d{1,2})/.exec(v); // 民國年防呆
         if (m) v = (+m[1] + 1911) + '-' + m[2] + '-' + m[3];
@@ -5686,6 +5709,8 @@ function pdfNormalize(key, v) {
 function showPdfConfirm(data) {
     var rows = [];
     PDF_FIELDS.forEach(function (f) { rows.push({ key: f[0], target: '#' + f[1], label: f[2], ai: pdfNormalize(f[0], data[f[0]]), cur: ($('#' + f[1]).val() || '').trim() }); });
+    rows.push({ key: 'fundingMode', target: 'radio:statusA', label: '結報表－經費預撥情形', ai: pdfNormalize('fundingMode', data.fundingMode),
+                cur: ($('input[name="statusA"]:checked').val() || '') });
     var cat = data.approvedByCategory || {};
     PDF_CATS.forEach(function (c) {
         var $inp = $('#settlementTable tbody tr[data-cat="' + c[0] + '"] .s-approved');
@@ -5694,7 +5719,7 @@ function showPdfConfirm(data) {
     });
 
     var html = rows.map(function (r, i) {
-        var conflict = r.cur && r.ai && r.cur !== r.ai;
+        var conflict = r.cur && r.ai && r.cur !== r.ai && r.key !== 'fundingMode';
         var checked = r.ai && !conflict;
         var type = r.key === 'incomingDate' ? 'date' : 'text';
         return '<tr class="' + (conflict ? 'table-warning' : '') + '">' +
@@ -5724,7 +5749,12 @@ function showPdfConfirm(data) {
         $('.pdf-apply:checked').each(function () {
             var r = rows[$(this).data('i')], val = $('.pdf-val[data-i="' + $(this).data('i') + '"]').val().trim();
             if (!val) return;
-            $(r.target).val(val).trigger('input').trigger('change');
+            if (r.target.indexOf('radio:') === 0) {
+                $('input[name="' + r.target.slice(6) + '"][value="' + val + '"]').prop('checked', true).trigger('change');
+                catTouched = true;
+            } else {
+                $(r.target).val(val).trigger('input').trigger('change');
+            }
             if (r.key.indexOf('cat:') === 0) catTouched = true;
             n++;
         });
@@ -5770,11 +5800,36 @@ async function analyzeWithGemini25(dataUrl) {
     }
 }
 
+
+// ---------- 免金鑰：用 Gemini 網頁判讀後貼回 ----------
+function pdfManualPrompt() {
+    return pdfPrompt().replace('請判讀後只輸出下列 JSON，不要 markdown：', '請判讀後只輸出下列 JSON，放在一個 ```json 程式碼區塊中，不要其他說明：');
+}
+$(function () {
+    $('#btnCopyPdfPrompt').on('click', function () {
+        var text = pdfManualPrompt();
+        (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+            .then(function () { showToast('✅ 已複製判讀提示詞，請到 Gemini 上傳公文並貼上。'); })
+            .catch(function () { window.prompt('請手動複製以下提示詞：', text); });
+    });
+    $('#btnParsePastedPdf').on('click', function () {
+        var t = $('#pdfPasteArea').val().trim();
+        if (!t) return showToast('請先貼上 Gemini 的回覆。', 'warning');
+        try { showPdfConfirm(aiParseJson(t)); }
+        catch (e) { showToast('❌ 看不懂貼上的內容，請複製 Gemini 回覆中 { 開頭、} 結尾的整段資料。', 'danger'); }
+    });
+});
+
 </script>
 
 <div class="modal fade" id="versionModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h5 class="modal-title fw-bold">📌 版本紀錄</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body small">
+    <h6 class="fw-bold text-primary">v4.4.4（2026-11-12）</h6>
+    <ul>
+      <li>核定公文判讀新增免金鑰方式：複製提示詞到 Gemini 網頁判讀，再把回覆貼回系統核對代入（PDF 或圖片皆可）。</li>
+      <li>判讀規則加強：可讀「8萬9,000元」等金額寫法；公文寫明經費來源為資本門時，自動帶入結報表的設備及投資核定金額；可代入結報表的「預撥／不預撥」。</li>
+    </ul>
     <h6 class="fw-bold text-primary">v4.4.3（2026-11-12）</h6>
     <ul>
       <li>修正：手機端沒有傳回品項明細時，匯入的請購單只有合計、沒有品名。現在會以用途說明 1 式代入，並在卡片上提醒。</li>
