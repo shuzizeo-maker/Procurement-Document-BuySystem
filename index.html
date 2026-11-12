@@ -2,7 +2,7 @@
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購憑證自動生成系統 v4.4.1</title>
+    <title>採購憑證自動生成系統 v4.4.2</title>
     <!-- CSS 資源 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -15,14 +15,14 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <script>
-var APP_VERSION = 'v4.4.1', APP_BUILD = '2026-11-12';
+var APP_VERSION = 'v4.4.2', APP_BUILD = '2026-11-12';
 var DEFAULT_MOE_CODE = '144676';   // 預設學校：臺東縣金峰鄉嘉蘭國民小學
 </script>
     <!-- 1. 臺東縣學校資料庫（內建） -->
     <script>
-// 臺東縣各級學校資料（來源：教育部統計處 115 學年各級學校名錄）
-// simpCode（縣府簡化代碼）、taxId（統一編號）名錄未提供：僅嘉蘭國小內建，其他學校由使用者自行填寫
-var SCHOOL_DATABASE = {"140601":{"simpCode":"","taxId":"","shortName":"臺東大學附小","fullName":"國立臺東大學附小","moeName":"國立臺東大學附小","town":"臺東市"},"144601":{"simpCode":"","taxId":"","shortName":"仁愛國民小學","fullName":"臺東縣臺東市仁愛國民小學","moeName":"縣立仁愛國小","town":"臺東市"},"144602":{"simpCode":"","taxId":"","shortName":"復興國民小學","fullName":"臺東縣臺東市復興國民小學","moeName":"縣立復興國小","town":"臺東市"},"144603":{"simpCode":"","taxId":"","shortName":"光明國民小學","fullName":"臺東縣臺東市光明國民小學","moeName":"縣立光明國小","town":"臺東市"},"144604":{"simpCode":"","taxId":"","shortName":"寶桑國民小學","fullName":"臺東縣臺東市寶桑國民小學","moeName":"縣立寶桑國小","town":"臺東市"},"144605":{"simpCode":"","taxId":"","shortName":"新生國民小學","fullName":"臺東縣臺東市新生國民小學","moeName":"縣立新生國小","town":"臺東市"},"144606":{"simpCode":"","taxId":"","shortName":"豐里國民小學","fullName":"臺東縣臺東市豐里國民小學","moeName":"縣立豐里國小","town":"臺東市"},"144607":{"simpCode":"","taxId":"","shortName":"豐榮國民小學","fullName":"臺東縣臺東市豐榮國民小學","moeName":"縣立豐榮國小","town":"臺東市"},"144608":{"simpCode":"","taxId":"","shortName":"馬蘭國民小學","fullName":"臺東縣臺東市馬蘭國民小學","moeName":"縣立馬蘭國小","town":"臺東市"},"144609":{"simpCode":"","taxId":"","shortName":"豐源國民小學","fullName":"臺東縣臺東市豐源國民小學","moeName":"縣立豐源國小","town":"臺東市"},"144610":{"simpCode":"","taxId":"","shortName":"康樂國民小學","fullName":"臺東縣臺東市康樂國民小學","moeName":"縣立康樂國小","town":"臺東市"},"144611":{"simpCode":"","taxId":"","shortName":"豐年國民小學","fullName":"臺東縣臺東市豐年國民小學","moeName":"縣立豐年國小","town":"臺東市"},"144612":{"simpCode":"","taxId":"","shortName":"卑南國民小學","fullName":"臺東縣臺東市卑南國民小學","moeName":"縣立卑南國小","town":"臺東市"},"144613":{"simpCode":"","taxId":"","shortName":"岩灣國民小學","fullName":"臺東縣臺東市岩灣國民小學","moeName":"縣立岩灣國小","town":"臺東市"},"144614":{"simpCode":"","taxId":"","shortName":"南王國民小學","fullName":"臺東縣臺東市南王國民小學","moeName":"縣立南王國小","town":"臺東市"},"144615":{"simpCode":"","taxId":"","shortName":"知本國民小學","fullName":"臺東縣臺東市知本國民小學","moeName":"縣立知本國小","town":"臺東市"},"144616":{"simpCode":"","taxId":"","shortName":"建和國民小學","fullName":"臺東縣臺東市建和國民小學","moeName":"縣立建和國小","town":"臺東市"},"144617":{"simpCode":"","taxId":"","shortName":"豐田國民小學","fullName":"臺東縣臺東市豐田國民小學","moeName":"縣立豐田國小","town":"臺東市"},"144618":{"simpCode":"","taxId":"","shortName":"富岡國民小學","fullName":"臺東縣臺東市富岡國民小學","moeName":"縣立富岡國小","town":"臺東市"},"144619":{"simpCode":"","taxId":"","shortName":"新園國民小學","fullName":"臺東縣臺東市新園國民小學","moeName":"縣立新園國小","town":"臺東市"},"144620":{"simpCode":"","taxId":"","shortName":"賓朗國民小學","fullName":"臺東縣卑南鄉賓朗國民小學","moeName":"縣立賓朗國小","town":"卑南鄉"},"144621":{"simpCode":"","taxId":"","shortName":"溫泉國民小學","fullName":"臺東縣卑南鄉溫泉國民小學","moeName":"縣立溫泉國小","town":"卑南鄉"},"144622":{"simpCode":"","taxId":"","shortName":"利嘉國民小學","fullName":"臺東縣卑南鄉利嘉國民小學","moeName":"縣立利嘉國小","town":"卑南鄉"},"144623":{"simpCode":"","taxId":"","shortName":"初鹿國民小學","fullName":"臺東縣卑南鄉初鹿國民小學","moeName":"縣立初鹿國小","town":"卑南鄉"},"144624":{"simpCode":"","taxId":"","shortName":"東成國民小學","fullName":"臺東縣卑南鄉東成國民小學","moeName":"縣立東成國小","town":"卑南鄉"},"144625":{"simpCode":"","taxId":"","shortName":"富山國民小學","fullName":"臺東縣卑南鄉富山國民小學","moeName":"縣立富山國小","town":"卑南鄉"},"144627":{"simpCode":"","taxId":"","shortName":"大南國民小學","fullName":"臺東縣卑南鄉大南國民小學","moeName":"縣立大南國小","town":"卑南鄉"},"144628":{"simpCode":"","taxId":"","shortName":"太平國民小學","fullName":"臺東縣卑南鄉太平國民小學","moeName":"縣立太平國小","town":"卑南鄉"},"144629":{"simpCode":"","taxId":"","shortName":"大王國民小學","fullName":"臺東縣太麻里鄉大王國民小學","moeName":"縣立大王國小","town":"太麻里鄉"},"144630":{"simpCode":"","taxId":"","shortName":"香蘭國民小學","fullName":"臺東縣太麻里鄉香蘭國民小學","moeName":"縣立香蘭國小","town":"太麻里鄉"},"144632":{"simpCode":"","taxId":"","shortName":"三和國民小學","fullName":"臺東縣太麻里鄉三和國民小學","moeName":"縣立三和國小","town":"太麻里鄉"},"144633":{"simpCode":"","taxId":"","shortName":"美和國民小學","fullName":"臺東縣太麻里鄉美和國民小學","moeName":"縣立美和國小","town":"太麻里鄉"},"144635":{"simpCode":"","taxId":"","shortName":"大溪國民小學","fullName":"臺東縣太麻里鄉大溪國民小學","moeName":"縣立大溪國小","town":"太麻里鄉"},"144636":{"simpCode":"","taxId":"","shortName":"尚武國民小學","fullName":"臺東縣大武鄉尚武國民小學","moeName":"縣立尚武國小","town":"大武鄉"},"144637":{"simpCode":"","taxId":"","shortName":"大武國民小學","fullName":"臺東縣大武鄉大武國民小學","moeName":"縣立大武國小","town":"大武鄉"},"144638":{"simpCode":"","taxId":"","shortName":"大鳥國民小學","fullName":"臺東縣大武鄉大鳥國民小學","moeName":"縣立大鳥國小","town":"大武鄉"},"144640":{"simpCode":"","taxId":"","shortName":"綠島國民小學","fullName":"臺東縣綠島鄉綠島國民小學","moeName":"縣立綠島國小","town":"綠島鄉"},"144641":{"simpCode":"","taxId":"","shortName":"公館國民小學","fullName":"臺東縣綠島鄉公館國民小學","moeName":"縣立公館國小","town":"綠島鄉"},"144642":{"simpCode":"","taxId":"","shortName":"鹿野國民小學","fullName":"臺東縣鹿野鄉鹿野國民小學","moeName":"縣立鹿野國小","town":"鹿野鄉"},"144643":{"simpCode":"","taxId":"","shortName":"龍田國民小學","fullName":"臺東縣鹿野鄉龍田國民小學","moeName":"縣立龍田國小","town":"鹿野鄉"},"144644":{"simpCode":"","taxId":"","shortName":"永安國民小學","fullName":"臺東縣鹿野鄉永安國民小學","moeName":"縣立永安國小","town":"鹿野鄉"},"144645":{"simpCode":"","taxId":"","shortName":"瑞豐國民小學","fullName":"臺東縣鹿野鄉瑞豐國民小學","moeName":"縣立瑞豐國小","town":"鹿野鄉"},"144646":{"simpCode":"","taxId":"","shortName":"瑞源國民小學","fullName":"臺東縣鹿野鄉瑞源國民小學","moeName":"縣立瑞源國小","town":"鹿野鄉"},"144647":{"simpCode":"","taxId":"","shortName":"關山國民小學","fullName":"臺東縣關山鎮關山國民小學","moeName":"縣立關山國小","town":"關山鎮"},"144648":{"simpCode":"","taxId":"","shortName":"月眉國民小學","fullName":"臺東縣關山鎮月眉國民小學","moeName":"縣立月眉國小","town":"關山鎮"},"144649":{"simpCode":"","taxId":"","shortName":"德高國民小學","fullName":"臺東縣關山鎮德高國民小學","moeName":"縣立德高國小","town":"關山鎮"},"144650":{"simpCode":"","taxId":"","shortName":"電光國民小學","fullName":"臺東縣關山鎮電光國民小學","moeName":"縣立電光國小","town":"關山鎮"},"144651":{"simpCode":"","taxId":"","shortName":"福原國民小學","fullName":"臺東縣池上鄉福原國民小學","moeName":"縣立福原國小","town":"池上鄉"},"144652":{"simpCode":"","taxId":"","shortName":"大坡國民小學","fullName":"臺東縣池上鄉大坡國民小學","moeName":"縣立大坡國小","town":"池上鄉"},"144653":{"simpCode":"","taxId":"","shortName":"萬安國民小學","fullName":"臺東縣池上鄉萬安國民小學","moeName":"縣立萬安國小","town":"池上鄉"},"144655":{"simpCode":"","taxId":"","shortName":"東河國民小學","fullName":"臺東縣東河鄉東河國民小學","moeName":"縣立東河國小","town":"東河鄉"},"144656":{"simpCode":"","taxId":"","shortName":"都蘭國民小學","fullName":"臺東縣東河鄉都蘭國民小學","moeName":"縣立都蘭國小","town":"東河鄉"},"144659":{"simpCode":"","taxId":"","shortName":"泰源國民小學","fullName":"臺東縣東河鄉泰源國民小學","moeName":"縣立泰源國小","town":"東河鄉"},"144660":{"simpCode":"","taxId":"","shortName":"北源國民小學","fullName":"臺東縣東河鄉北源國民小學","moeName":"縣立北源國小","town":"東河鄉"},"144662":{"simpCode":"","taxId":"","shortName":"三民國民小學","fullName":"臺東縣成功鎮三民國民小學","moeName":"縣立三民國小","town":"成功鎮"},"144663":{"simpCode":"","taxId":"","shortName":"成功國民小學","fullName":"臺東縣成功鎮成功國民小學","moeName":"縣立成功國小","town":"成功鎮"},"144664":{"simpCode":"","taxId":"","shortName":"信義國民小學","fullName":"臺東縣成功鎮信義國民小學","moeName":"縣立信義國小","town":"成功鎮"},"144665":{"simpCode":"","taxId":"","shortName":"三仙國民小學","fullName":"臺東縣成功鎮三仙國民小學","moeName":"縣立三仙國小","town":"成功鎮"},"144667":{"simpCode":"","taxId":"","shortName":"忠孝國民小學","fullName":"臺東縣成功鎮忠孝國民小學","moeName":"縣立忠孝國小","town":"成功鎮"},"144669":{"simpCode":"","taxId":"","shortName":"長濱國民小學","fullName":"臺東縣長濱鄉長濱國民小學","moeName":"縣立長濱國小","town":"長濱鄉"},"144671":{"simpCode":"","taxId":"","shortName":"寧埔國民小學","fullName":"臺東縣長濱鄉寧埔國民小學","moeName":"縣立寧埔國小","town":"長濱鄉"},"144672":{"simpCode":"","taxId":"","shortName":"竹湖國民小學","fullName":"臺東縣長濱鄉竹湖國民小學","moeName":"縣立竹湖國小","town":"長濱鄉"},"144673":{"simpCode":"","taxId":"","shortName":"三間國民小學","fullName":"臺東縣長濱鄉三間國民小學","moeName":"縣立三間國小","town":"長濱鄉"},"144674":{"simpCode":"","taxId":"","shortName":"樟原國民小學","fullName":"臺東縣長濱鄉樟原國民小學","moeName":"縣立樟原國小","town":"長濱鄉"},"144676":{"simpCode":"674","taxId":"12072062","shortName":"嘉蘭國民小學","fullName":"臺東縣金峰鄉嘉蘭國民小學","moeName":"縣立嘉蘭國小","town":"金峰鄉"},"144677":{"simpCode":"","taxId":"","shortName":"介達國民小學","fullName":"臺東縣金峰鄉介達國民小學","moeName":"縣立介達國小","town":"金峰鄉"},"144678":{"simpCode":"","taxId":"","shortName":"新興國民小學","fullName":"臺東縣金峰鄉新興國民小學","moeName":"縣立新興國小","town":"金峰鄉"},"144679":{"simpCode":"","taxId":"","shortName":"賓茂國民小學","fullName":"臺東縣金峰鄉賓茂國民小學","moeName":"縣立賓茂國小","town":"金峰鄉"},"144680":{"simpCode":"","taxId":"","shortName":"安朔國民小學","fullName":"臺東縣達仁鄉安朔國民小學","moeName":"縣立安朔國小","town":"達仁鄉"},"144681":{"simpCode":"","taxId":"","shortName":"土坂vusam實小","fullName":"臺東縣達仁鄉土坂vusam實小","moeName":"縣立土坂vusam實小","town":"達仁鄉"},"144683":{"simpCode":"","taxId":"","shortName":"臺坂國民小學","fullName":"臺東縣達仁鄉臺坂國民小學","moeName":"縣立臺坂國小","town":"達仁鄉"},"144685":{"simpCode":"","taxId":"","shortName":"蘭嶼國民小學","fullName":"臺東縣蘭嶼鄉蘭嶼國民小學","moeName":"縣立蘭嶼國小","town":"蘭嶼鄉"},"144686":{"simpCode":"","taxId":"","shortName":"椰油國民小學","fullName":"臺東縣蘭嶼鄉椰油國民小學","moeName":"縣立椰油國小","town":"蘭嶼鄉"},"144687":{"simpCode":"","taxId":"","shortName":"東清國民小學","fullName":"臺東縣蘭嶼鄉東清國民小學","moeName":"縣立東清國小","town":"蘭嶼鄉"},"144688":{"simpCode":"","taxId":"","shortName":"朗島國民小學","fullName":"臺東縣蘭嶼鄉朗島國民小學","moeName":"縣立朗島國小","town":"蘭嶼鄉"},"144689":{"simpCode":"","taxId":"","shortName":"桃源國民小學","fullName":"臺東縣延平鄉桃源國民小學","moeName":"縣立桃源國小","town":"延平鄉"},"144690":{"simpCode":"","taxId":"","shortName":"武陵國民小學","fullName":"臺東縣延平鄉武陵國民小學","moeName":"縣立武陵國小","town":"延平鄉"},"144692":{"simpCode":"","taxId":"","shortName":"鸞山國民小學","fullName":"臺東縣延平鄉鸞山國民小學","moeName":"縣立鸞山國小","town":"延平鄉"},"144693":{"simpCode":"","taxId":"","shortName":"紅葉國民小學","fullName":"臺東縣延平鄉紅葉國民小學","moeName":"縣立紅葉國小","town":"延平鄉"},"144694":{"simpCode":"","taxId":"","shortName":"海端國民小學","fullName":"臺東縣海端鄉海端國民小學","moeName":"縣立海端國小","town":"海端鄉"},"144695":{"simpCode":"","taxId":"","shortName":"初來國民小學","fullName":"臺東縣海端鄉初來國民小學","moeName":"縣立初來國小","town":"海端鄉"},"144696":{"simpCode":"","taxId":"","shortName":"崁頂國民小學","fullName":"臺東縣海端鄉崁頂國民小學","moeName":"縣立崁頂國小","town":"海端鄉"},"144697":{"simpCode":"","taxId":"","shortName":"廣原國民小學","fullName":"臺東縣海端鄉廣原國民小學","moeName":"縣立廣原國小","town":"海端鄉"},"144698":{"simpCode":"","taxId":"","shortName":"錦屏國民小學","fullName":"臺東縣海端鄉錦屏國民小學","moeName":"縣立錦屏國小","town":"海端鄉"},"144700":{"simpCode":"","taxId":"","shortName":"加拿國民小學","fullName":"臺東縣海端鄉加拿國民小學","moeName":"縣立加拿國小","town":"海端鄉"},"144701":{"simpCode":"","taxId":"","shortName":"東海國民小學","fullName":"臺東縣臺東市東海國民小學","moeName":"縣立東海國小","town":"臺東市"},"144702":{"simpCode":"","taxId":"","shortName":"霧鹿國民小學","fullName":"臺東縣海端鄉霧鹿國民小學","moeName":"縣立霧鹿國小","town":"海端鄉"},"144703":{"simpCode":"","taxId":"","shortName":"興隆國民小學","fullName":"臺東縣東河鄉興隆國民小學","moeName":"縣立興隆國小","town":"東河鄉"},"141502":{"simpCode":"","taxId":"","shortName":"育仁國中","fullName":"私立育仁國中","moeName":"私立育仁國中","town":"臺東市"},"144501":{"simpCode":"","taxId":"","shortName":"新生國民中學","fullName":"臺東縣立新生國民中學","moeName":"縣立新生國中","town":"臺東市"},"144502":{"simpCode":"","taxId":"","shortName":"東海國民中學","fullName":"臺東縣立東海國民中學","moeName":"縣立東海國中","town":"臺東市"},"144503":{"simpCode":"","taxId":"","shortName":"寶桑國民中學","fullName":"臺東縣立寶桑國民中學","moeName":"縣立寶桑國中","town":"臺東市"},"144504":{"simpCode":"","taxId":"","shortName":"卑南國民中學","fullName":"臺東縣立卑南國民中學","moeName":"縣立卑南國中","town":"臺東市"},"144505":{"simpCode":"","taxId":"","shortName":"豐田國民中學","fullName":"臺東縣立豐田國民中學","moeName":"縣立豐田國中","town":"臺東市"},"144506":{"simpCode":"","taxId":"","shortName":"知本國民中學","fullName":"臺東縣立知本國民中學","moeName":"縣立知本國中","town":"臺東市"},"144507":{"simpCode":"","taxId":"","shortName":"初鹿國民中學","fullName":"臺東縣立初鹿國民中學","moeName":"縣立初鹿國中","town":"卑南鄉"},"144508":{"simpCode":"","taxId":"","shortName":"鹿野國民中學","fullName":"臺東縣立鹿野國民中學","moeName":"縣立鹿野國中","town":"鹿野鄉"},"144509":{"simpCode":"","taxId":"","shortName":"瑞源國民中學","fullName":"臺東縣立瑞源國民中學","moeName":"縣立瑞源國中","town":"鹿野鄉"},"144510":{"simpCode":"","taxId":"","shortName":"關山國民中學","fullName":"臺東縣立關山國民中學","moeName":"縣立關山國中","town":"關山鎮"},"144511":{"simpCode":"","taxId":"","shortName":"池上國民中學","fullName":"臺東縣立池上國民中學","moeName":"縣立池上國中","town":"池上鄉"},"144512":{"simpCode":"","taxId":"","shortName":"大王國民中學","fullName":"臺東縣立大王國民中學","moeName":"縣立大王國中","town":"太麻里鄉"},"144513":{"simpCode":"","taxId":"","shortName":"賓茂國民中學","fullName":"臺東縣立賓茂國民中學","moeName":"縣立賓茂國中","town":"太麻里鄉"},"144514":{"simpCode":"","taxId":"","shortName":"大武國民中學","fullName":"臺東縣立大武國民中學","moeName":"縣立大武國中","town":"大武鄉"},"144515":{"simpCode":"","taxId":"","shortName":"都蘭國民中學","fullName":"臺東縣立都蘭國民中學","moeName":"縣立都蘭國中","town":"東河鄉"},"144516":{"simpCode":"","taxId":"","shortName":"泰源國民中學","fullName":"臺東縣立泰源國民中學","moeName":"縣立泰源國中","town":"東河鄉"},"144517":{"simpCode":"","taxId":"","shortName":"新港國民中學","fullName":"臺東縣立新港國民中學","moeName":"縣立新港國中","town":"成功鎮"},"144518":{"simpCode":"","taxId":"","shortName":"長濱國民中學","fullName":"臺東縣立長濱國民中學","moeName":"縣立長濱國中","town":"長濱鄉"},"144519":{"simpCode":"","taxId":"","shortName":"桃源國民中學","fullName":"臺東縣立桃源國民中學","moeName":"縣立桃源國中","town":"延平鄉"},"144520":{"simpCode":"","taxId":"","shortName":"海端國民中學","fullName":"臺東縣立海端國民中學","moeName":"縣立海端國中","town":"海端鄉"},"144521":{"simpCode":"","taxId":"","shortName":"綠島國民中學","fullName":"臺東縣立綠島國民中學","moeName":"縣立綠島國中","town":"綠島鄉"},"140301":{"simpCode":"","taxId":"","shortName":"臺東大學附屬體育高中","fullName":"國立臺東大學附屬體育高中","moeName":"國立臺東大學附屬體育高中","town":"臺東市"},"140302":{"simpCode":"","taxId":"","shortName":"臺東女中","fullName":"國立臺東女中","moeName":"國立臺東女中","town":"臺東市"},"140303":{"simpCode":"","taxId":"","shortName":"臺東高中","fullName":"國立臺東高中","moeName":"國立臺東高中","town":"臺東市"},"140404":{"simpCode":"","taxId":"","shortName":"關山工商","fullName":"國立關山工商","moeName":"國立關山工商","town":"關山鎮"},"140405":{"simpCode":"","taxId":"","shortName":"臺東高商","fullName":"國立臺東高商","moeName":"國立臺東高商","town":"臺東市"},"140408":{"simpCode":"","taxId":"","shortName":"成功商水","fullName":"國立成功商水","moeName":"國立成功商水","town":"成功鎮"},"141301":{"simpCode":"","taxId":"","shortName":"臺東縣均一高中","fullName":"臺東縣均一高中","moeName":"臺東縣均一高中","town":"臺東市"},"141406":{"simpCode":"","taxId":"","shortName":"公東高工","fullName":"私立公東高工","moeName":"私立公東高工","town":"臺東市"},"144322":{"simpCode":"","taxId":"","shortName":"蘭嶼高級中學","fullName":"臺東縣立蘭嶼高級中學","moeName":"縣立蘭嶼高中","town":"蘭嶼鄉"}};
+// 臺東縣各級學校資料：縣立學校（含簡化代碼）取自校長版 school_database.js；
+// 國立、私立、特教學校依教育部統計處 115 學年名錄補入，無簡化代碼。
+var SCHOOL_DATABASE = {"144322":{"simpCode":"401","taxId":"","shortName":"蘭嶼高級中學","fullName":"臺東縣立蘭嶼高級中學","moeName":"縣立蘭嶼高中","town":"蘭嶼鄉"},"144504":{"simpCode":"501","taxId":"","shortName":"卑南國民中學","fullName":"臺東縣立卑南國民中學","moeName":"縣立卑南國中","town":"臺東市"},"144511":{"simpCode":"502","taxId":"","shortName":"池上國民中學","fullName":"臺東縣立池上國民中學","moeName":"縣立池上國中","town":"池上鄉"},"144517":{"simpCode":"503","taxId":"","shortName":"新港國民中學","fullName":"臺東縣立新港國民中學","moeName":"縣立新港國中","town":"成功鎮"},"144501":{"simpCode":"504","taxId":"","shortName":"新生國民中學","fullName":"臺東縣立新生國民中學","moeName":"縣立新生國中","town":"臺東市"},"144514":{"simpCode":"505","taxId":"","shortName":"大武國民中學","fullName":"臺東縣立大武國民中學","moeName":"縣立大武國中","town":"大武鄉"},"144502":{"simpCode":"506","taxId":"","shortName":"東海國民中學","fullName":"臺東縣立東海國民中學","moeName":"縣立東海國中","town":"臺東市"},"144503":{"simpCode":"507","taxId":"","shortName":"寶桑國民中學","fullName":"臺東縣立寶桑國民中學","moeName":"縣立寶桑國中","town":"臺東市"},"144506":{"simpCode":"508","taxId":"","shortName":"知本國民中學","fullName":"臺東縣立知本國民中學","moeName":"縣立知本國中","town":"臺東市"},"144512":{"simpCode":"509","taxId":"","shortName":"大王國民中學","fullName":"臺東縣立大王國民中學","moeName":"縣立大王國中","town":"太麻里鄉"},"144513":{"simpCode":"510","taxId":"","shortName":"賓茂國民中學","fullName":"臺東縣立賓茂國民中學","moeName":"縣立賓茂國中","town":"太麻里鄉"},"144508":{"simpCode":"511","taxId":"","shortName":"鹿野國民中學","fullName":"臺東縣立鹿野國民中學","moeName":"縣立鹿野國中","town":"鹿野鄉"},"144510":{"simpCode":"512","taxId":"","shortName":"關山國民中學","fullName":"臺東縣立關山國民中學","moeName":"縣立關山國中","town":"關山鎮"},"144519":{"simpCode":"513","taxId":"","shortName":"桃源國民中學","fullName":"臺東縣立桃源國民中學","moeName":"縣立桃源國中","town":"延平鄉"},"144520":{"simpCode":"514","taxId":"","shortName":"海端國民中學","fullName":"臺東縣立海端國民中學","moeName":"縣立海端國中","town":"海端鄉"},"144515":{"simpCode":"515","taxId":"","shortName":"都蘭國民中學","fullName":"臺東縣立都蘭國民中學","moeName":"縣立都蘭國中","town":"東河鄉"},"144518":{"simpCode":"516","taxId":"","shortName":"長濱國民中學","fullName":"臺東縣立長濱國民中學","moeName":"縣立長濱國中","town":"長濱鄉"},"144521":{"simpCode":"517","taxId":"","shortName":"綠島國民中學","fullName":"臺東縣立綠島國民中學","moeName":"縣立綠島國中","town":"綠島鄉"},"144509":{"simpCode":"518","taxId":"","shortName":"瑞源國民中學","fullName":"臺東縣立瑞源國民中學","moeName":"縣立瑞源國中","town":"鹿野鄉"},"144516":{"simpCode":"519","taxId":"","shortName":"泰源國民中學","fullName":"臺東縣立泰源國民中學","moeName":"縣立泰源國中","town":"東河鄉"},"144507":{"simpCode":"520","taxId":"","shortName":"初鹿國民中學","fullName":"臺東縣立初鹿國民中學","moeName":"縣立初鹿國中","town":"卑南鄉"},"144505":{"simpCode":"521","taxId":"","shortName":"豐田國民中學","fullName":"臺東縣立豐田國民中學","moeName":"縣立豐田國中","town":"臺東市"},"144601":{"simpCode":"601","taxId":"","shortName":"仁愛國民小學","fullName":"臺東縣臺東市仁愛國民小學","moeName":"縣立仁愛國小","town":"臺東市"},"144603":{"simpCode":"602","taxId":"","shortName":"光明國民小學","fullName":"臺東縣臺東市光明國民小學","moeName":"縣立光明國小","town":"臺東市"},"144602":{"simpCode":"603","taxId":"","shortName":"復興國民小學","fullName":"臺東縣臺東市復興國民小學","moeName":"縣立復興國小","town":"臺東市"},"144604":{"simpCode":"604","taxId":"","shortName":"寶桑國民小學","fullName":"臺東縣臺東市寶桑國民小學","moeName":"縣立寶桑國小","town":"臺東市"},"144605":{"simpCode":"605","taxId":"","shortName":"新生國民小學","fullName":"臺東縣臺東市新生國民小學","moeName":"縣立新生國小","town":"臺東市"},"144608":{"simpCode":"606","taxId":"","shortName":"馬蘭國民小學","fullName":"臺東縣臺東市馬蘭國民小學","moeName":"縣立馬蘭國小","town":"臺東市"},"144606":{"simpCode":"607","taxId":"","shortName":"豐里國民小學","fullName":"臺東縣臺東市豐里國民小學","moeName":"縣立豐里國小","town":"臺東市"},"144609":{"simpCode":"608","taxId":"","shortName":"豐源國民小學","fullName":"臺東縣臺東市豐源國民小學","moeName":"縣立豐源國小","town":"臺東市"},"144610":{"simpCode":"609","taxId":"","shortName":"康樂國民小學","fullName":"臺東縣臺東市康樂國民小學","moeName":"縣立康樂國小","town":"臺東市"},"144611":{"simpCode":"610","taxId":"","shortName":"豐年國民小學","fullName":"臺東縣臺東市豐年國民小學","moeName":"縣立豐年國小","town":"臺東市"},"144607":{"simpCode":"611","taxId":"","shortName":"豐榮國民小學","fullName":"臺東縣臺東市豐榮國民小學","moeName":"縣立豐榮國小","town":"臺東市"},"144612":{"simpCode":"612","taxId":"","shortName":"卑南國民小學","fullName":"臺東縣臺東市卑南國民小學","moeName":"縣立卑南國小","town":"臺東市"},"144614":{"simpCode":"613","taxId":"","shortName":"南王國民小學","fullName":"臺東縣臺東市南王國民小學","moeName":"縣立南王國小","town":"臺東市"},"144613":{"simpCode":"614","taxId":"","shortName":"岩灣國民小學","fullName":"臺東縣臺東市岩灣國民小學","moeName":"縣立岩灣國小","town":"臺東市"},"144618":{"simpCode":"615","taxId":"","shortName":"富岡國民小學","fullName":"臺東縣臺東市富岡國民小學","moeName":"縣立富岡國小","town":"臺東市"},"144617":{"simpCode":"616","taxId":"","shortName":"豐田國民小學","fullName":"臺東縣臺東市豐田國民小學","moeName":"縣立豐田國小","town":"臺東市"},"144619":{"simpCode":"617","taxId":"","shortName":"新園國民小學","fullName":"臺東縣臺東市新園國民小學","moeName":"縣立新園國小","town":"臺東市"},"144616":{"simpCode":"618","taxId":"","shortName":"建和國民小學","fullName":"臺東縣臺東市建和國民小學","moeName":"縣立建和國小","town":"臺東市"},"144615":{"simpCode":"619","taxId":"","shortName":"知本國民小學","fullName":"臺東縣臺東市知本國民小學","moeName":"縣立知本國小","town":"臺東市"},"144701":{"simpCode":"620","taxId":"","shortName":"東海國民小學","fullName":"臺東縣臺東市東海國民小學","moeName":"縣立東海國小","town":"臺東市"},"144625":{"simpCode":"626","taxId":"","shortName":"富山國民小學","fullName":"臺東縣卑南鄉富山國民小學","moeName":"縣立富山國小","town":"卑南鄉"},"144620":{"simpCode":"627","taxId":"","shortName":"賓朗國民小學","fullName":"臺東縣卑南鄉賓朗國民小學","moeName":"縣立賓朗國小","town":"卑南鄉"},"144624":{"simpCode":"628","taxId":"","shortName":"東成國民小學","fullName":"臺東縣卑南鄉東成國民小學","moeName":"縣立東成國小","town":"卑南鄉"},"144623":{"simpCode":"629","taxId":"","shortName":"初鹿國民小學","fullName":"臺東縣卑南鄉初鹿國民小學","moeName":"縣立初鹿國小","town":"卑南鄉"},"144628":{"simpCode":"630","taxId":"","shortName":"太平國民小學","fullName":"臺東縣卑南鄉太平國民小學","moeName":"縣立太平國小","town":"卑南鄉"},"144622":{"simpCode":"631","taxId":"","shortName":"利嘉國民小學","fullName":"臺東縣卑南鄉利嘉國民小學","moeName":"縣立利嘉國小","town":"卑南鄉"},"144627":{"simpCode":"632","taxId":"","shortName":"大南國民小學","fullName":"臺東縣卑南鄉大南國民小學","moeName":"縣立大南國小","town":"卑南鄉"},"144621":{"simpCode":"633","taxId":"","shortName":"溫泉國民小學","fullName":"臺東縣卑南鄉溫泉國民小學","moeName":"縣立溫泉國小","town":"卑南鄉"},"144629":{"simpCode":"634","taxId":"","shortName":"大王國民小學","fullName":"臺東縣太麻里鄉大王國民小學","moeName":"縣立大王國小","town":"太麻里鄉"},"144632":{"simpCode":"635","taxId":"","shortName":"三和國民小學","fullName":"臺東縣太麻里鄉三和國民小學","moeName":"縣立三和國小","town":"太麻里鄉"},"144633":{"simpCode":"636","taxId":"","shortName":"美和國民小學","fullName":"臺東縣太麻里鄉美和國民小學","moeName":"縣立美和國小","town":"太麻里鄉"},"144630":{"simpCode":"637","taxId":"","shortName":"香蘭國民小學","fullName":"臺東縣太麻里鄉香蘭國民小學","moeName":"縣立香蘭國小","town":"太麻里鄉"},"144635":{"simpCode":"638","taxId":"","shortName":"大溪國民小學","fullName":"臺東縣太麻里鄉大溪國民小學","moeName":"縣立大溪國小","town":"太麻里鄉"},"144636":{"simpCode":"639","taxId":"","shortName":"尚武國民小學","fullName":"臺東縣大武鄉尚武國民小學","moeName":"縣立尚武國小","town":"大武鄉"},"144637":{"simpCode":"640","taxId":"","shortName":"大武國民小學","fullName":"臺東縣大武鄉大武國民小學","moeName":"縣立大武國小","town":"大武鄉"},"144638":{"simpCode":"641","taxId":"","shortName":"大鳥國民小學","fullName":"臺東縣大武鄉大鳥國民小學","moeName":"縣立大鳥國小","town":"大武鄉"},"144640":{"simpCode":"642","taxId":"","shortName":"綠島國民小學","fullName":"臺東縣綠島鄉綠島國民小學","moeName":"縣立綠島國小","town":"綠島鄉"},"144641":{"simpCode":"643","taxId":"","shortName":"公館國民小學","fullName":"臺東縣綠島鄉公館國民小學","moeName":"縣立公館國小","town":"綠島鄉"},"144642":{"simpCode":"644","taxId":"","shortName":"鹿野國民小學","fullName":"臺東縣鹿野鄉鹿野國民小學","moeName":"縣立鹿野國小","town":"鹿野鄉"},"144643":{"simpCode":"645","taxId":"","shortName":"龍田國民小學","fullName":"臺東縣鹿野鄉龍田國民小學","moeName":"縣立龍田國小","town":"鹿野鄉"},"144644":{"simpCode":"646","taxId":"","shortName":"永安國民小學","fullName":"臺東縣鹿野鄉永安國民小學","moeName":"縣立永安國小","town":"鹿野鄉"},"144646":{"simpCode":"647","taxId":"","shortName":"瑞源國民小學","fullName":"臺東縣鹿野鄉瑞源國民小學","moeName":"縣立瑞源國小","town":"鹿野鄉"},"144645":{"simpCode":"648","taxId":"","shortName":"瑞豐國民小學","fullName":"臺東縣鹿野鄉瑞豐國民小學","moeName":"縣立瑞豐國小","town":"鹿野鄉"},"144647":{"simpCode":"649","taxId":"","shortName":"關山國民小學","fullName":"臺東縣關山鎮關山國民小學","moeName":"縣立關山國小","town":"關山鎮"},"144648":{"simpCode":"650","taxId":"","shortName":"月眉國民小學","fullName":"臺東縣關山鎮月眉國民小學","moeName":"縣立月眉國小","town":"關山鎮"},"144649":{"simpCode":"651","taxId":"","shortName":"德高國民小學","fullName":"臺東縣關山鎮德高國民小學","moeName":"縣立德高國小","town":"關山鎮"},"144650":{"simpCode":"652","taxId":"","shortName":"電光國民小學","fullName":"臺東縣關山鎮電光國民小學","moeName":"縣立電光國小","town":"關山鎮"},"144651":{"simpCode":"653","taxId":"","shortName":"福原國民小學","fullName":"臺東縣池上鄉福原國民小學","moeName":"縣立福原國小","town":"池上鄉"},"144652":{"simpCode":"654","taxId":"","shortName":"大坡國民小學","fullName":"臺東縣池上鄉大坡國民小學","moeName":"縣立大坡國小","town":"池上鄉"},"144653":{"simpCode":"655","taxId":"","shortName":"萬安國民小學","fullName":"臺東縣池上鄉萬安國民小學","moeName":"縣立萬安國小","town":"池上鄉"},"144655":{"simpCode":"656","taxId":"","shortName":"東河國民小學","fullName":"臺東縣東河鄉東河國民小學","moeName":"縣立東河國小","town":"東河鄉"},"144656":{"simpCode":"657","taxId":"","shortName":"都蘭國民小學","fullName":"臺東縣東河鄉都蘭國民小學","moeName":"縣立都蘭國小","town":"東河鄉"},"144703":{"simpCode":"658","taxId":"","shortName":"興隆國民小學","fullName":"臺東縣東河鄉興隆國民小學","moeName":"縣立興隆國小","town":"東河鄉"},"144659":{"simpCode":"659","taxId":"","shortName":"泰源國民小學","fullName":"臺東縣東河鄉泰源國民小學","moeName":"縣立泰源國小","town":"東河鄉"},"144660":{"simpCode":"660","taxId":"","shortName":"北源國民小學","fullName":"臺東縣東河鄉北源國民小學","moeName":"縣立北源國小","town":"東河鄉"},"144662":{"simpCode":"661","taxId":"","shortName":"三民國民小學","fullName":"臺東縣成功鎮三民國民小學","moeName":"縣立三民國小","town":"成功鎮"},"144663":{"simpCode":"662","taxId":"","shortName":"成功國民小學","fullName":"臺東縣成功鎮成功國民小學","moeName":"縣立成功國小","town":"成功鎮"},"144664":{"simpCode":"663","taxId":"","shortName":"信義國民小學","fullName":"臺東縣成功鎮信義國民小學","moeName":"縣立信義國小","town":"成功鎮"},"144665":{"simpCode":"665","taxId":"","shortName":"三仙國民小學","fullName":"臺東縣成功鎮三仙國民小學","moeName":"縣立三仙國小","town":"成功鎮"},"144667":{"simpCode":"666","taxId":"","shortName":"忠孝國民小學","fullName":"臺東縣成功鎮忠孝國民小學","moeName":"縣立忠孝國小","town":"成功鎮"},"144669":{"simpCode":"668","taxId":"","shortName":"長濱國民小學","fullName":"臺東縣長濱鄉長濱國民小學","moeName":"縣立長濱國小","town":"長濱鄉"},"144671":{"simpCode":"670","taxId":"","shortName":"寧埔國民小學","fullName":"臺東縣長濱鄉寧埔國民小學","moeName":"縣立寧埔國小","town":"長濱鄉"},"144672":{"simpCode":"671","taxId":"","shortName":"竹湖國民小學","fullName":"臺東縣長濱鄉竹湖國民小學","moeName":"縣立竹湖國小","town":"長濱鄉"},"144673":{"simpCode":"672","taxId":"","shortName":"三間國民小學","fullName":"臺東縣長濱鄉三間國民小學","moeName":"縣立三間國小","town":"長濱鄉"},"144674":{"simpCode":"673","taxId":"","shortName":"樟原國民小學","fullName":"臺東縣長濱鄉樟原國民小學","moeName":"縣立樟原國小","town":"長濱鄉"},"144676":{"simpCode":"674","taxId":"12072062","shortName":"嘉蘭國民小學","fullName":"臺東縣金峰鄉嘉蘭國民小學","moeName":"縣立嘉蘭國小","town":"金峰鄉"},"144677":{"simpCode":"675","taxId":"","shortName":"介達國民小學","fullName":"臺東縣金峰鄉介達國民小學","moeName":"縣立介達國小","town":"金峰鄉"},"144679":{"simpCode":"676","taxId":"","shortName":"賓茂國民小學","fullName":"臺東縣金峰鄉賓茂國民小學","moeName":"縣立賓茂國小","town":"金峰鄉"},"144678":{"simpCode":"677","taxId":"","shortName":"新興國民小學","fullName":"臺東縣金峰鄉新興國民小學","moeName":"縣立新興國小","town":"金峰鄉"},"144680":{"simpCode":"678","taxId":"","shortName":"安朔國民小學","fullName":"臺東縣達仁鄉安朔國民小學","moeName":"縣立安朔國小","town":"達仁鄉"},"144681":{"simpCode":"679","taxId":"","shortName":"土坂國民小學","fullName":"臺東縣達仁鄉土坂國民小學","moeName":"縣立土坂vusam實小","town":"達仁鄉"},"144683":{"simpCode":"680","taxId":"","shortName":"臺坂國民小學","fullName":"臺東縣達仁鄉臺坂國民小學","moeName":"縣立臺坂國小","town":"達仁鄉"},"144685":{"simpCode":"681","taxId":"","shortName":"蘭嶼國民小學","fullName":"臺東縣蘭嶼鄉蘭嶼國民小學","moeName":"縣立蘭嶼國小","town":"蘭嶼鄉"},"144686":{"simpCode":"682","taxId":"","shortName":"椰油國民小學","fullName":"臺東縣蘭嶼鄉椰油國民小學","moeName":"縣立椰油國小","town":"蘭嶼鄉"},"144687":{"simpCode":"683","taxId":"","shortName":"東清國民小學","fullName":"臺東縣蘭嶼鄉東清國民小學","moeName":"縣立東清國小","town":"蘭嶼鄉"},"144688":{"simpCode":"684","taxId":"","shortName":"朗島國民小學","fullName":"臺東縣蘭嶼鄉朗島國民小學","moeName":"縣立朗島國小","town":"蘭嶼鄉"},"144689":{"simpCode":"685","taxId":"","shortName":"桃源國民小學","fullName":"臺東縣延平鄉桃源國民小學","moeName":"縣立桃源國小","town":"延平鄉"},"144690":{"simpCode":"686","taxId":"","shortName":"武陵國民小學","fullName":"臺東縣延平鄉武陵國民小學","moeName":"縣立武陵國小","town":"延平鄉"},"144692":{"simpCode":"687","taxId":"","shortName":"鸞山國民小學","fullName":"臺東縣延平鄉鸞山國民小學","moeName":"縣立鸞山國小","town":"延平鄉"},"144693":{"simpCode":"688","taxId":"","shortName":"紅葉國民小學","fullName":"臺東縣延平鄉紅葉國民小學","moeName":"縣立紅葉國小","town":"延平鄉"},"144694":{"simpCode":"689","taxId":"","shortName":"海端國民小學","fullName":"臺東縣海端鄉海端國民小學","moeName":"縣立海端國小","town":"海端鄉"},"144695":{"simpCode":"690","taxId":"","shortName":"初來國民小學","fullName":"臺東縣海端鄉初來國民小學","moeName":"縣立初來國小","town":"海端鄉"},"144696":{"simpCode":"691","taxId":"","shortName":"崁頂國民小學","fullName":"臺東縣海端鄉崁頂國民小學","moeName":"縣立崁頂國小","town":"海端鄉"},"144697":{"simpCode":"692","taxId":"","shortName":"廣原國民小學","fullName":"臺東縣海端鄉廣原國民小學","moeName":"縣立廣原國小","town":"海端鄉"},"144698":{"simpCode":"693","taxId":"","shortName":"錦屏國民小學","fullName":"臺東縣海端鄉錦屏國民小學","moeName":"縣立錦屏國小","town":"海端鄉"},"144702":{"simpCode":"694","taxId":"","shortName":"霧鹿國民小學","fullName":"臺東縣海端鄉霧鹿國民小學","moeName":"縣立霧鹿國小","town":"海端鄉"},"144700":{"simpCode":"695","taxId":"","shortName":"加拿國民小學","fullName":"臺東縣海端鄉加拿國民小學","moeName":"縣立加拿國小","town":"海端鄉"},"140601":{"simpCode":"","taxId":"","shortName":"臺東大學附小","fullName":"國立臺東大學附設實驗國民小學","moeName":"國立臺東大學附小","town":"臺東市"},"140301":{"simpCode":"","taxId":"","shortName":"臺東體中","fullName":"國立臺東大學附屬體育高級中學","moeName":"國立臺東大學附屬體育高中","town":"臺東市"},"140302":{"simpCode":"","taxId":"","shortName":"臺東女中","fullName":"國立臺東女子高級中學","moeName":"國立臺東女中","town":"臺東市"},"140303":{"simpCode":"","taxId":"","shortName":"臺東高中","fullName":"國立臺東高級中學","moeName":"國立臺東高中","town":"臺東市"},"140404":{"simpCode":"","taxId":"","shortName":"關山工商","fullName":"國立關山高級工商職業學校","moeName":"國立關山工商","town":"關山鎮"},"140405":{"simpCode":"","taxId":"","shortName":"臺東高商","fullName":"國立臺東高級商業職業學校","moeName":"國立臺東高商","town":"臺東市"},"140408":{"simpCode":"","taxId":"","shortName":"成功商水","fullName":"國立成功高級商業水產職業學校","moeName":"國立成功商水","town":"成功鎮"},"140F01":{"simpCode":"","taxId":"","shortName":"臺東大學附屬特教學校","fullName":"國立臺東大學附屬特殊教育學校","moeName":"國立臺東大學附屬特殊教育學校","town":"臺東市"},"141301":{"simpCode":"","taxId":"","shortName":"均一高中","fullName":"臺東縣均一國際教育實驗高級中等學校","moeName":"臺東縣均一高中","town":"臺東市"},"141406":{"simpCode":"","taxId":"","shortName":"公東高工","fullName":"臺東縣私立公東高級工業職業學校","moeName":"私立公東高工","town":"臺東市"},"141502":{"simpCode":"","taxId":"","shortName":"育仁中學","fullName":"臺東縣私立育仁高級中學","moeName":"私立育仁國中","town":"臺東市"}};
     </script>
     <!-- 2. 經費結報表 Excel 匯出（內建） -->
     <script>
@@ -276,7 +276,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 <body>
 
 <div class="container-fluid py-4" style="max-width: 1400px;" id="pcMainApp">
-    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.1</span></h3>
+    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.2</span></h3>
 
     <!-- 頁籤導覽列 (Tabs Header) -->
 <!-- 頁籤導覽列 (Tabs Header) -->
@@ -289,6 +289,9 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link  fw-bold" id="input-tab" data-bs-toggle="tab" data-bs-target="#input-pane" type="button" role="tab" aria-selected="false" tabindex="-1">📸 採購憑證</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-success" id="invoice-sync-tab" data-bs-toggle="tab" data-bs-target="#invoice-sync-pane" type="button" role="tab" aria-selected="false" tabindex="-1">📡 發票辨識</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold" id="hourly-tab" data-bs-toggle="tab" data-bs-target="#hourly-pane" type="button" role="tab" aria-selected="false" tabindex="-1">🏫 鐘點費憑證</button>
@@ -456,6 +459,91 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
                     </div>
                 </div>
             </div>              
+        </div>
+
+
+        <!-- 📌 [頁籤] 發票辨識接收頁面 (#invoice-sync-pane)：手機用 Gemini 辨識，經 ntfy.sh 傳回電腦，免 API 金鑰 -->
+        <div class="tab-pane fade" id="invoice-sync-pane" role="tabpanel" tabindex="0" aria-labelledby="invoice-sync-tab">
+            <div class="row mt-2">
+                <div class="col-lg-4">
+                    <!-- 1. 手機辨識程式 QR Code -->
+                    <div class="card p-3 shadow-sm border-primary-subtle mb-3 text-center">
+                        <h5 class="fw-bold text-primary mb-1">📱 ① 手機掃碼開啟辨識程式</h5>
+                        <p class="small text-secondary mb-2">在手機的 Gemini 裡拍發票辨識，<b>不需要 API 金鑰</b>（需登入 Google 帳號）。</p>
+                        <div class="row g-2">
+                            <div class="col-6 border-end">
+                                <div class="d-flex justify-content-center mb-2">
+                                    <div id="phoneSyncQrAreaIos" class="p-1 border rounded bg-white" style="width:120px;height:120px;display:flex;align-items:center;justify-content:center;"></div>
+                                </div>
+                                <a id="phoneSyncLinkIos" href="#" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm fw-bold w-100">iPhone（用 Chrome 開）</a>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex justify-content-center mb-2">
+                                    <div id="phoneSyncQrAreaGeneral" class="p-1 border rounded bg-white" style="width:120px;height:120px;display:flex;align-items:center;justify-content:center;"></div>
+                                </div>
+                                <a id="phoneSyncLinkGeneral" href="#" target="_blank" rel="noopener" class="btn btn-outline-success btn-sm fw-bold w-100">Android／其他</a>
+                            </div>
+                        </div>
+                        <details class="text-start small mt-3">
+                            <summary class="fw-bold text-secondary">⚙️ 手機辨識程式設定</summary>
+                            <div class="mt-2">
+                                <label class="form-label small fw-bold mb-1">Gemini 分享連結</label>
+                                <div class="input-group input-group-sm mb-1">
+                                    <input type="url" id="invPhoneLinkInput" class="form-control" placeholder="https://share.gemini.google/...">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnResetInvLink" title="恢復預設">↺</button>
+                                </div>
+                                <div class="form-text small mb-2" id="invLinkHint"></div>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="invSecureSwitch">
+                                    <label class="form-check-label small fw-bold" for="invSecureSwitch">🔒 加密模式（10 碼配對碼）</label>
+                                    <div class="form-text small">需搭配支援加密的自建手機程式。預設的校長版手機程式只支援 6 碼、不加密。</div>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm fw-bold w-100" type="button" id="btnCopyPhonePrompt">📋 複製「自建手機辨識程式」提示詞</button>
+                                <div class="form-text small">貼到 Gemini 的 Canvas 產生程式，再按「分享」取得連結，貼回上方欄位。</div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- 2. 配對碼 -->
+                    <div class="card p-4 shadow-sm border-success-subtle mb-3">
+                        <h5 class="fw-bold text-success mb-2">📡 ② 產生配對碼，輸入到手機</h5>
+                        <button class="btn btn-success btn-lg fw-bold w-100 mb-3" id="btnGenerateSyncCode">🔄 產生配對碼</button>
+                        <div class="border rounded p-3 bg-light text-center mb-3" id="syncCodeDisplayArea" style="display:none;">
+                            <span class="text-secondary small d-block mb-1" id="syncCodeLabel">您的配對碼（請在手機輸入）</span>
+                            <div class="fw-bold text-dark mb-0" id="syncCodeText" style="font-size:2.4rem;letter-spacing:.15em;font-family:monospace;">------</div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-center p-2 rounded bg-light">
+                            <span class="badge bg-secondary me-2" id="syncStatusBadge">未連線</span>
+                            <span class="small fw-bold text-secondary" id="syncStatusText">尚未建立連線</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. 統計 -->
+                    <div class="card p-4 shadow-sm bg-success text-white">
+                        <h6 class="fw-bold mb-3 border-bottom border-light pb-2">📊 接收統計</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2"><span>累計接收張數：</span><h4 class="mb-0 fw-bold"><span id="syncTotalCount">0</span> 張</h4></div>
+                        <div class="d-flex justify-content-between align-items-center"><span>累計總金額：</span><h3 class="mb-0 fw-bold">NT$ <span id="syncTotalAmount">0</span></h3></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card p-4 shadow-sm h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h5 class="fw-bold text-dark mb-0">🧾 ③ 已接收發票（核對後按「匯入憑證」）</h5>
+                            <button class="btn btn-sm btn-outline-danger fw-bold" id="btnClearSyncList">🗑️ 清空列表</button>
+                        </div>
+                        <div class="alert alert-light border small py-2 mb-3">
+                            ℹ️ 發票資料會經過 Google Gemini 與公開推播服務 ntfy.sh 傳送。配對碼就是頻道密碼，請勿外流；每次使用請重新產生。匯入前請核對金額與品項。
+                        </div>
+                        <div id="syncInvoiceList" style="max-height:700px;overflow-y:auto;padding-right:5px;">
+                            <div class="text-center text-muted py-5" id="syncEmptyState">
+                                <h5 class="text-secondary">尚未收到任何發票資料</h5>
+                                <p class="small">請先產生配對碼，並於手機端辨識完成後傳送。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- 📌 [頁籤二] 憑證清單頁面 (#list-pane) -->
@@ -1043,9 +1131,17 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
                         <div class="card p-4 h-100 border border-success-subtle shadow-sm">
                             <h5 class="fw-bold text-success mb-3">✍️ 校名管理與領據核章</h5>
                             <div class="row g-2">
+                                <div class="col-12 mb-2 position-relative">
+                                    <label class="form-label fw-bold small text-primary">🔎 查詢學校（輸入代碼或校名皆可）</label>
+                                    <input type="text" id="schoolSearchInput" class="form-control form-control-sm border-primary" autocomplete="off"
+                                           placeholder="例如：嘉蘭、金峰、144676、674、臺東高中">
+                                    <div id="schoolSearchList" class="list-group position-absolute w-100 shadow"
+                                         style="z-index: 1060; max-height: 280px; overflow-y: auto; display: none;"></div>
+                                    <div class="form-text small">選定後自動帶入教育部代碼、簡化代碼、學校簡稱與全銜；下方欄位仍可手動修改。</div>
+                                </div>
                                 <div class="col-md-4 mb-2">
-                                    <label class="form-label fw-bold small text-primary">🏫 教育部代碼 (臺東縣自動查詢)</label>
-                                    <input type="text" id="moeCodeInput" class="form-control form-control-sm config-meta-input" maxlength="6" list="moeSchoolList" placeholder="代碼或校名"><datalist id="moeSchoolList"></datalist>
+                                    <label class="form-label fw-bold small text-primary">🏫 教育部代碼</label>
+                                    <input type="text" id="moeCodeInput" class="form-control form-control-sm config-meta-input" maxlength="6" placeholder="6 碼代碼">
                                 </div>
                                 <div class="col-md-4 mb-2">
                                     <label class="form-label fw-bold small text-secondary">簡化代碼 <span class="fw-normal">(縣府結報用)</span></label>
@@ -5679,6 +5775,13 @@ async function analyzeWithGemini25(dataUrl) {
 <div class="modal fade" id="versionModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h5 class="modal-title fw-bold">📌 版本紀錄</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body small">
+    <h6 class="fw-bold text-primary">v4.4.2（2026-11-12）</h6>
+    <ul>
+      <li>「專案設定」新增學校查詢框：輸入代碼、簡化代碼、校名、簡稱或鄉鎮皆可，選定後自動帶入。</li>
+      <li>新增「發票辨識」分頁：手機在 Gemini 中拍照辨識、經 ntfy.sh 傳回電腦，不需 API 金鑰；相容校長版手機程式，另提供 10 碼加密模式與自建手機程式提示詞。</li>
+      <li>學校資料改用校長整理的縣立學校簡化代碼（109 所），並補入國立、私立與特教學校，共 120 所。</li>
+      <li>修正土坂國小全銜。</li>
+    </ul>
     <h6 class="fw-bold text-primary">v4.4.1（2026-11-12）</h6>
     <ul>
       <li>預設學校為嘉蘭國小：簡化代碼 674、統一編號 12072062；選擇其他學校時這兩欄會清空，請自行輸入。</li>
@@ -5695,10 +5798,360 @@ async function analyzeWithGemini25(dataUrl) {
       <li>重建經費結報表 Excel 匯出；外部函式庫改用公開 CDN，可獨立部署。</li>
     </ul>
     <h6 class="fw-bold text-secondary">v4.3</h6>
-    <ul class="mb-0"><li>原始版本。</li></ul>
+    <ul class="mb-0"><li>原始版本（校長製作）。本版之縣立學校資料與手機辨識程式經校長同意使用。</li></ul>
   </div>
 </div></div></div>
 <div class="text-center text-muted small py-3">採購憑證自動生成系統 <span id="appVersionFooter"></span>｜<a href="#" data-bs-toggle="modal" data-bs-target="#versionModal">版本紀錄</a></div>
 <script>$(function(){ $('#appVersionFooter').text(APP_VERSION + '（' + APP_BUILD + '）'); });</script>
+<script type="text/plain" id="invPhonePromptText">請用 Canvas 幫我做一個「手機版發票辨識」網頁應用程式（單一 HTML，繁體中文介面，適合手機直式操作），要求如下：
+
+【功能流程】
+1. 畫面上方有「配對碼」輸入框，以及「拍照／選擇發票照片」按鈕（<input type="file" accept="image/*" capture="environment">，可一次選多張）。
+2. 每張照片用 Gemini（這個 Canvas 應用程式內建的 Gemini 能力，不要求使用者輸入 API 金鑰）辨識，輸出下列 JSON：
+{
+  "invoice_number": "發票號碼（2 碼大寫英文 + 8 碼數字；收據沒有就填空字串）",
+  "invoice_date": "YYYY-MM-DD（民國年請加 1911 轉成西元）",
+  "purpose": "建議的用途說明簡稱，例如 辦公文具、研習講義",
+  "total_amount": 總金額（數字）,
+  "items": [ { "name": "品名", "unit": "繁體中文單位，例如 個、包、本、支、盒", "quantity": 數量, "unit_price": 單價, "subtotal": 小計 } ]
+}
+3. 辨識結果以卡片顯示，欄位都可以在手機上修改、可刪除品項，按「傳送到電腦」才送出。
+4. 傳送方式：用 fetch 以 POST 把 JSON 文字送到 ntfy.sh（body 是純文字，不要加任何 header）：
+   - 若配對碼是 6 位數字：網址為 https://ntfy.sh/invoice_sync_<配對碼>，body 直接是上面的 JSON 字串（不加密）。
+   - 若配對碼是 10 碼英數（可能含一個「-」，例如 ABCDE-23456）：使用加密模式，完全照下面的程式碼計算頻道與加密，body 送出 encryptPayload() 的回傳值。
+5. 送出成功顯示「✅ 已傳送」，失敗顯示原因並可重送。配對碼記在 localStorage，下次自動帶入。
+
+【加密模式程式碼（請原封不動使用）】
+function normCode(code){ return code.toUpperCase().replace(/[^A-Z0-9]/g,''); }
+function b64(buf){ var s=''; new Uint8Array(buf).forEach(function(b){ s+=String.fromCharCode(b); }); return btoa(s); }
+async function secureTopic(code){
+  var h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('jialan-topic:' + normCode(code)));
+  return 'jlinv_' + Array.from(new Uint8Array(h)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('').slice(0,32);
+}
+async function secureKey(code){
+  var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(normCode(code)), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt:new TextEncoder().encode('jialan-invoice-v1'), iterations:100000, hash:'SHA-256' },
+    base, { name:'AES-GCM', length:256 }, false, ['encrypt']);
+}
+async function encryptPayload(code, jsonText){
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv:iv }, await secureKey(code), new TextEncoder().encode(jsonText));
+  return JSON.stringify({ v:1, iv:b64(iv), ct:b64(ct) });
+}
+// 加密模式的網址：'https://ntfy.sh/' + await secureTopic(配對碼)
+
+【注意】
+- 不要把照片傳到 Gemini 以外的任何地方，ntfy.sh 只送辨識後的 JSON。
+- 介面用大按鈕、大字，方便老師單手操作。
+</script>
+<script>
+// ==========================================
+// 🔎 學校雙向查詢（代碼 ⇄ 校名）
+// ==========================================
+(function () {
+    function norm(s) { return String(s || '').replace(/台/g, '臺').replace(/\s/g, '').toLowerCase(); }
+    var INDEX = [];
+    if (typeof SCHOOL_DATABASE !== 'undefined') {
+        Object.keys(SCHOOL_DATABASE).forEach(function (code) {
+            var s = SCHOOL_DATABASE[code];
+            INDEX.push({ code: code, s: s, hay: norm([code, s.simpCode, s.fullName, s.shortName, s.moeName, s.town].join('|')) });
+        });
+    }
+    function search(q) {
+        q = norm(q);
+        if (!q) return [];
+        var out = [];
+        INDEX.forEach(function (it) {
+            var score = -1;
+            if (it.code === q || it.s.simpCode === q) score = 0;
+            else if (it.code.indexOf(q) === 0 || (it.s.simpCode && it.s.simpCode.indexOf(q) === 0)) score = 1;
+            else if (norm(it.s.shortName).indexOf(q) === 0) score = 2;
+            else if (it.hay.indexOf(q) >= 0) score = 3;
+            if (score >= 0) out.push({ it: it, score: score });
+        });
+        out.sort(function (a, b) { return a.score - b.score || a.it.code.localeCompare(b.it.code); });
+        return out.map(function (x) { return x.it; });
+    }
+    function esc(t) { return $('<div>').text(t).html(); }
+    function mark(text, q) {
+        var t = String(text || ''), nq = norm(q), i = norm(t).indexOf(nq);
+        if (!nq || i < 0) return esc(t);
+        return esc(t.slice(0, i)) + '<mark class="p-0">' + esc(t.slice(i, i + nq.length)) + '</mark>' + esc(t.slice(i + nq.length));
+    }
+
+    var results = [], active = -1;
+    function render(q) {
+        var $list = $('#schoolSearchList').empty();
+        if (!q.trim()) { $list.hide(); return; }
+        if (!results.length) {
+            $list.append('<div class="list-group-item small text-muted">找不到符合的學校，請直接在下方欄位手動填寫。</div>').show();
+            return;
+        }
+        results.slice(0, 15).forEach(function (it, i) {
+            var s = it.s;
+            $list.append(
+                '<button type="button" class="list-group-item list-group-item-action py-1 small school-pick' + (i === active ? ' active' : '') + '" data-i="' + i + '">' +
+                '<div class="fw-bold">' + mark(s.fullName, q) + '</div>' +
+                '<div class="' + (i === active ? '' : 'text-muted') + '">代碼 ' + mark(it.code, q) +
+                (s.simpCode ? '｜簡化代碼 ' + mark(s.simpCode, q) : '｜無簡化代碼') + '｜' + mark(s.shortName, q) + '</div></button>');
+        });
+        if (results.length > 15) $list.append('<div class="list-group-item small text-muted">還有 ' + (results.length - 15) + ' 所，請再多打幾個字。</div>');
+        $list.show();
+    }
+    function pick(it) {
+        if (!it) return;
+        $('#moeCodeInput').val(it.code).data('lastCode', null).trigger('input');
+        $('#schoolSearchInput').val(it.s.fullName + '（' + it.code + '）');
+        $('#schoolSearchList').hide();
+        results = []; active = -1;
+    }
+
+    $(document).on('input', '#schoolSearchInput', function () {
+        var q = $(this).val();
+        results = search(q); active = results.length ? 0 : -1;
+        // 只剩一所且已輸入兩個字以上：直接帶入
+        if (results.length === 1 && norm(q).length >= 2) {
+            var only = results[0];
+            if ($('#moeCodeInput').val() !== only.code) { $('#moeCodeInput').val(only.code).data('lastCode', null).trigger('input'); }
+        }
+        render(q);
+    });
+    $(document).on('keydown', '#schoolSearchInput', function (e) {
+        if (!$('#schoolSearchList').is(':visible') || !results.length) return;
+        var n = Math.min(results.length, 15);
+        if (e.key === 'ArrowDown') { active = (active + 1) % n; render($(this).val()); e.preventDefault(); }
+        else if (e.key === 'ArrowUp') { active = (active - 1 + n) % n; render($(this).val()); e.preventDefault(); }
+        else if (e.key === 'Enter') { pick(results[Math.max(active, 0)]); e.preventDefault(); }
+        else if (e.key === 'Escape') { $('#schoolSearchList').hide(); }
+    });
+    $(document).on('mousedown', '.school-pick', function (e) { e.preventDefault(); pick(results[+$(this).data('i')]); });
+    $(document).on('focus', '#schoolSearchInput', function () { if ($(this).val() && results.length) $('#schoolSearchList').show(); });
+    $(document).on('blur', '#schoolSearchInput', function () { setTimeout(function () { $('#schoolSearchList').hide(); }, 150); });
+
+    // 頁面載入時，搜尋框顯示目前學校
+    $(function () {
+        var code = $('#moeCodeInput').val();
+        if (code && SCHOOL_DATABASE[code]) $('#schoolSearchInput').val(SCHOOL_DATABASE[code].fullName + '（' + code + '）');
+    });
+    window.searchSchools = search;
+})();
+
+</script>
+<script>
+// ==========================================
+// 📡 發票辨識接收端（手機 Gemini 辨識 → ntfy.sh → 電腦）
+// 相容校長版手機程式（6 碼明文），另支援 10 碼加密模式
+// ==========================================
+var INV_DEFAULT_LINK = 'https://share.gemini.google/Z8ENy5r8yo8R';   // 校長版手機辨識程式（已獲同意使用）
+var INV_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+var INV_MAX_PER_SESSION = 200;
+
+function invLink() { return aiStoreGet('inv_phone_link', INV_DEFAULT_LINK); }
+function invSecure() { return aiStoreGet('inv_secure', '0') === '1'; }
+function invNorm(code) { return String(code).toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+function invHex(buf) { return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); }
+function invUnb64(s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+
+function invNewCode(secure) {
+    if (!secure) return String(100000 + Math.floor(Math.random() * 900000));
+    var a = new Uint32Array(10), s = '';
+    crypto.getRandomValues(a);
+    for (var i = 0; i < 10; i++) s += INV_ALPHABET[a[i] % INV_ALPHABET.length];
+    return s.slice(0, 5) + '-' + s.slice(5);
+}
+async function invTopic(code, secure) {
+    if (!secure) return 'invoice_sync_' + code;
+    var h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('jialan-topic:' + invNorm(code)));
+    return 'jlinv_' + invHex(h).slice(0, 32);
+}
+async function invKey(code) {
+    var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(invNorm(code)), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: new TextEncoder().encode('jialan-invoice-v1'), iterations: 100000, hash: 'SHA-256' },
+        base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+}
+
+$(function () {
+    var es = null, session = null, totalCount = 0, totalAmount = 0, invoices = [], seenIds = {};
+
+    // ---------- 手機程式連結與 QR ----------
+    function renderPhoneQr() {
+        var link = invLink();
+        var ios = link.replace(/^https:\/\//, 'googlechrome://');
+        $('#phoneSyncLinkGeneral').attr('href', link);
+        $('#phoneSyncLinkIos').attr('href', ios);
+        $('#invPhoneLinkInput').val(link);
+        $('#invSecureSwitch').prop('checked', invSecure());
+        $('#invLinkHint').html(link === INV_DEFAULT_LINK ? '目前使用校長版手機程式（6 碼、不加密）。' : '目前使用自訂手機程式。');
+        [['phoneSyncQrAreaIos', ios], ['phoneSyncQrAreaGeneral', link]].forEach(function (x) {
+            var el = document.getElementById(x[0]);
+            if (!el || typeof QRCode === 'undefined') return;
+            $(el).empty();
+            new QRCode(el, { text: x[1], width: 110, height: 110, correctLevel: QRCode.CorrectLevel.M });
+        });
+    }
+    renderPhoneQr();
+    $('#invoice-sync-tab').on('shown.bs.tab', renderPhoneQr);
+
+    $('#invPhoneLinkInput').on('change', function () {
+        var v = $(this).val().trim();
+        if (v && !/^https:\/\//.test(v)) { showToast('連結必須以 https:// 開頭。', 'warning'); return renderPhoneQr(); }
+        aiStoreSet('inv_phone_link', v || INV_DEFAULT_LINK); renderPhoneQr(); showToast('✅ 已更新手機辨識程式連結');
+    });
+    $('#btnResetInvLink').on('click', function () { aiStoreDel('inv_phone_link'); renderPhoneQr(); });
+    $('#invSecureSwitch').on('change', function () {
+        aiStoreSet('inv_secure', this.checked ? '1' : '0');
+        stop('模式已切換，請重新產生配對碼。');
+    });
+    $('#btnCopyPhonePrompt').on('click', function () {
+        var text = document.getElementById('invPhonePromptText').textContent;
+        (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+            .then(function () { showToast('✅ 已複製提示詞，請貼到 Gemini 的 Canvas。'); })
+            .catch(function () { window.prompt('請手動複製以下提示詞：', text); });
+    });
+
+    // ---------- 連線 ----------
+    function setStatus(kind, badge, text) {
+        var cls = { wait: 'bg-warning text-dark', ok: 'bg-success', err: 'bg-danger', off: 'bg-secondary' }[kind];
+        $('#syncStatusBadge').attr('class', 'badge me-2 ' + cls).text(badge);
+        $('#syncStatusText').attr('class', 'small fw-bold ' + (kind === 'ok' ? 'text-success' : kind === 'err' ? 'text-danger' : 'text-secondary')).text(text);
+    }
+    function stop(msg) {
+        if (es) { es.close(); es = null; }
+        session = null;
+        $('#syncCodeDisplayArea').hide();
+        setStatus('off', '未連線', msg || '尚未建立連線');
+    }
+
+    $('#btnGenerateSyncCode').on('click', async function () {
+        if (es) es.close();
+        var secure = invSecure();
+        if (secure && !(window.crypto && crypto.subtle)) { showToast('此瀏覽器環境不支援加密，請改用 https 網址開啟系統。', 'danger'); return; }
+        var code = invNewCode(secure);
+        var topic = await invTopic(code, secure);
+        session = { code: code, secure: secure, key: secure ? await invKey(code) : null, topic: topic };
+        $('#syncCodeText').text(code);
+        $('#syncCodeLabel').text(secure ? '🔒 加密配對碼（請在手機輸入，含不含「-」皆可）' : '配對碼（請在手機輸入）');
+        $('#syncCodeDisplayArea').fadeIn();
+        setStatus('wait', '連線中', '正在建立連線…');
+        try {
+            es = new EventSource('https://ntfy.sh/' + topic + '/sse');
+            var mySession = session;
+            es.onopen = function () { if (session === mySession) setStatus('ok', '等待接收', '已就緒！請在手機輸入配對碼 ' + code); };
+            es.onmessage = function (ev) {
+                if (session !== mySession) return;
+                var d; try { d = JSON.parse(ev.data); } catch (e) { return; }
+                if (d.event !== 'message' || !d.message || seenIds[d.id]) return;
+                seenIds[d.id] = true;
+                receive(d.message, mySession);
+            };
+            es.onerror = function () { if (session === mySession) setStatus('err', '重新連線中', '連線中斷，系統會自動重試；若持續失敗請重新產生配對碼。'); };
+            showToast('📡 配對碼 ' + code + ' 已啟用，等待手機傳送。');
+        } catch (e) {
+            setStatus('err', '連線失敗', '無法建立連線，請確認網路或託管平台是否阻擋 ntfy.sh。');
+        }
+    });
+
+    // ---------- 接收與驗證 ----------
+    function num(v) { var n = parseFloat(String(v === undefined || v === null ? '' : v).replace(/[,，元\s]/g, '')); return isFinite(n) ? n : 0; }
+    function str(v, max) { return String(v === undefined || v === null ? '' : v).slice(0, max || 100); }
+    function sanitize(raw) {
+        if (!raw || typeof raw !== 'object' || !Array.isArray(raw.items)) throw new Error('缺少品項');
+        var items = raw.items.slice(0, 100).map(function (it) {
+            var q = num(it.quantity) || 1, p = num(it.unit_price), sub = num(it.subtotal !== undefined ? it.subtotal : it.amount);
+            if (!sub && p) sub = q * p;
+            if (!p && sub) p = Math.round(sub / q * 100) / 100;
+            return { name: str(it.name), unit: str(it.unit, 10) || '個', quantity: q, unit_price: p, subtotal: sub };
+        });
+        var total = num(raw.total_amount) || items.reduce(function (s, it) { return s + it.subtotal; }, 0);
+        var date = str(raw.invoice_date || raw.date, 20);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) date = '';
+        return { invoice_number: str(raw.invoice_number, 20).toUpperCase(), invoice_date: date, purpose: str(raw.purpose || raw.purpose_suggestion, 60),
+                 total_amount: total, items: items };
+    }
+    async function receive(message, sess) {
+        try {
+            var payload = JSON.parse(message);
+            if (sess.secure) {
+                if (!payload || payload.v !== 1 || !payload.iv || !payload.ct) throw new Error('收到未加密的資料，已忽略');
+                var plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: invUnb64(payload.iv) }, sess.key, invUnb64(payload.ct));
+                payload = JSON.parse(new TextDecoder().decode(plain));
+            }
+            if (invoices.length >= INV_MAX_PER_SESSION) throw new Error('已達接收上限，請清空列表');
+            var inv = sanitize(payload);
+            inv._id = 'sync_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            inv._sum = inv.items.reduce(function (s, it) { return s + it.subtotal; }, 0);
+            invoices.push(inv);
+            totalCount++; totalAmount += inv.total_amount;
+            $('#syncTotalCount').text(totalCount);
+            $('#syncTotalAmount').text(totalAmount.toLocaleString());
+            $('#syncEmptyState').hide();
+            $(card(inv)).hide().prependTo('#syncInvoiceList').fadeIn('slow');
+            showToast('📥 收到發票：' + (inv.invoice_number || '（無號碼）') + '，NT$ ' + inv.total_amount.toLocaleString());
+        } catch (e) {
+            console.warn('發票資料無效：', e);
+            showToast('⚠️ 收到無法辨識的資料（' + (e.message || '格式錯誤') + '），已略過。', 'warning');
+        }
+    }
+    function card(d) {
+        var e = aiEsc;
+        var rows = d.items.length ? d.items.map(function (it) {
+            return '<tr><td class="text-start">' + e(it.name) + '</td><td class="text-center">' + e(it.unit) + '</td><td class="text-center">' + it.quantity +
+                '</td><td class="text-end">' + it.unit_price.toLocaleString() + '</td><td class="text-end">' + it.subtotal.toLocaleString() + '</td></tr>';
+        }).join('') : '<tr><td colspan="5" class="text-center text-muted">無明細項目</td></tr>';
+        var mismatch = d.items.length && Math.abs(d._sum - d.total_amount) >= 1;
+        return '<div class="card border-primary mb-3 shadow-sm" id="card_' + d._id + '">' +
+            '<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">' +
+            '<h6 class="mb-0 fw-bold">🧾 ' + e(d.invoice_number || '無發票號') + '</h6><div>' +
+            '<span class="badge bg-light text-primary me-2" id="badge_status_' + d._id + '">待匯入</span>' +
+            '<span class="badge bg-white text-dark">' + e(d.invoice_date || '無日期') + '</span></div></div>' +
+            '<div class="card-body py-2">' +
+            '<div class="d-flex justify-content-between mb-2 pb-2 border-bottom flex-wrap gap-2">' +
+            '<span class="text-secondary fw-bold">用途說明：<span class="text-dark">' + e(d.purpose || '（未提供）') + '</span></span>' +
+            '<span class="text-secondary fw-bold">總金額：<span class="text-danger fs-5">NT$ ' + d.total_amount.toLocaleString() + '</span></span></div>' +
+            (mismatch ? '<div class="alert alert-warning py-1 small mb-2">⚠️ 品項小計合計 ' + d._sum.toLocaleString() + ' 元，與總金額不符，匯入後請核對。</div>' : '') +
+            '<table class="table table-sm table-bordered table-striped text-secondary mb-2" style="font-size:.85rem;"><thead class="table-light text-center"><tr>' +
+            '<th>品名</th><th style="width:60px;">單位</th><th style="width:50px;">數量</th><th style="width:70px;">單價</th><th style="width:80px;">小計</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+            '<div class="d-flex justify-content-end gap-2 mt-2">' +
+            '<select class="form-select form-select-sm w-auto inv-cat" data-id="' + d._id + '"><option>業務費</option><option>人事費</option><option>行政管理費</option><option>設備及投資</option></select>' +
+            '<button class="btn btn-sm btn-success fw-bold btn-direct-import" data-id="' + d._id + '">⬇️ 匯入憑證</button></div></div></div>';
+    }
+
+    // ---------- 匯入憑證清單 ----------
+    $(document).on('click', '.btn-direct-import', function () {
+        var id = $(this).data('id');
+        var inv = invoices.find(function (x) { return x._id === id; });
+        if (!inv || inv._isImported) return;
+        var list = [];
+        try { list = JSON.parse(localStorage.getItem('school_voucher_list') || '[]'); if (!Array.isArray(list)) list = []; } catch (e) { list = []; }
+        var nextId = list.reduce(function (m, v) { return Math.max(m, Number(v.id) || 0); }, 0) + 1;
+        var day = inv.invoice_date || new Date().toISOString().split('T')[0];
+        list.push({
+            id: nextId, voucherType: (typeof VOUCHER_TYPES !== 'undefined' ? VOUCHER_TYPES.GENERAL : 'GENERAL'),
+            applyDate: day, invoiceDate: day, verifyDate: day,
+            category: $('.inv-cat[data-id="' + id + '"]').val() || '業務費', budget: '',
+            purpose: inv.purpose, invNo: inv.invoice_number, totalAmt: inv.total_amount,
+            items: inv.items.map(function (it) { return { name: it.name, specification: '', brand: '', quantity: it.quantity, unit: it.unit, price: it.unit_price, amount: it.subtotal }; })
+        });
+        localStorage.setItem('school_voucher_list', JSON.stringify(list));
+        if (typeof loadVoucherList === 'function') loadVoucherList();
+        inv._isImported = true;
+        $(this).prop('disabled', true).removeClass('btn-success').addClass('btn-secondary').html('✅ 已匯入');
+        $('.inv-cat[data-id="' + id + '"]').prop('disabled', true);
+        $('#badge_status_' + id).removeClass('bg-light text-primary').addClass('bg-success text-white').text('已收錄');
+        $('#card_' + id).removeClass('border-primary').addClass('border-success');
+        showToast('✅ 已收錄至憑證清單（編號 ' + nextId + '），可到「憑證清單」編輯預算科目。');
+    });
+
+    $('#btnClearSyncList').on('click', function () {
+        if (!confirm('確定要清空已接收的發票列表嗎？（已匯入憑證清單的資料不受影響）')) return;
+        $('#syncInvoiceList').find('.card').remove();
+        $('#syncEmptyState').show();
+        totalCount = 0; totalAmount = 0; invoices = [];
+        $('#syncTotalCount').text(0); $('#syncTotalAmount').text(0);
+    });
+    window.__invTest = { receive: function (m) { return receive(m, session); }, session: function () { return session; } };
+});
+
+</script>
 </body>
 </html>
