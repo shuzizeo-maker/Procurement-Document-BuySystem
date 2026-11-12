@@ -2,7 +2,7 @@
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購憑證自動生成系統 v4.4.2</title>
+    <title>採購憑證自動生成系統 v4.4.3</title>
     <!-- CSS 資源 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <script>
-var APP_VERSION = 'v4.4.2', APP_BUILD = '2026-11-12';
+var APP_VERSION = 'v4.4.3', APP_BUILD = '2026-11-12';
 var DEFAULT_MOE_CODE = '144676';   // 預設學校：臺東縣金峰鄉嘉蘭國民小學
 </script>
     <!-- 1. 臺東縣學校資料庫（內建） -->
@@ -276,7 +276,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 <body>
 
 <div class="container-fluid py-4" style="max-width: 1400px;" id="pcMainApp">
-    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.2</span></h3>
+    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.3</span></h3>
 
     <!-- 頁籤導覽列 (Tabs Header) -->
 <!-- 頁籤導覽列 (Tabs Header) -->
@@ -5775,6 +5775,11 @@ async function analyzeWithGemini25(dataUrl) {
 <div class="modal fade" id="versionModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h5 class="modal-title fw-bold">📌 版本紀錄</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body small">
+    <h6 class="fw-bold text-primary">v4.4.3（2026-11-12）</h6>
+    <ul>
+      <li>修正：手機端沒有傳回品項明細時，匯入的請購單只有合計、沒有品名。現在會以用途說明 1 式代入，並在卡片上提醒。</li>
+      <li>發票辨識可讀取多種欄位名稱（如 qty、price、amount），日期支援民國年；卡片可查看手機傳來的原始資料。</li>
+    </ul>
     <h6 class="fw-bold text-primary">v4.4.2（2026-11-12）</h6>
     <ul>
       <li>「專案設定」新增學校查詢框：輸入代碼、簡化代碼、校名、簡稱或鄉鎮皆可，選定後自動帶入。</li>
@@ -6054,19 +6059,35 @@ $(function () {
     // ---------- 接收與驗證 ----------
     function num(v) { var n = parseFloat(String(v === undefined || v === null ? '' : v).replace(/[,，元\s]/g, '')); return isFinite(n) ? n : 0; }
     function str(v, max) { return String(v === undefined || v === null ? '' : v).slice(0, max || 100); }
+    function pick(o, keys) { for (var i = 0; i < keys.length; i++) if (o[keys[i]] !== undefined && o[keys[i]] !== null && o[keys[i]] !== '') return o[keys[i]]; return undefined; }
     function sanitize(raw) {
-        if (!raw || typeof raw !== 'object' || !Array.isArray(raw.items)) throw new Error('缺少品項');
-        var items = raw.items.slice(0, 100).map(function (it) {
-            var q = num(it.quantity) || 1, p = num(it.unit_price), sub = num(it.subtotal !== undefined ? it.subtotal : it.amount);
+        if (!raw || typeof raw !== 'object') throw new Error('格式錯誤');
+        var rawItems = pick(raw, ['items', 'item_list', 'details', 'products', '品項']);
+        if (!Array.isArray(rawItems)) rawItems = [];
+        var items = rawItems.slice(0, 100).map(function (it) {
+            if (typeof it === 'string') it = { name: it };
+            var q = num(pick(it, ['quantity', 'qty', 'count', '數量'])) || 1;
+            var p = num(pick(it, ['unit_price', 'price', 'unitPrice', '單價']));
+            var sub = num(pick(it, ['subtotal', 'amount', 'total', 'sum', '小計', '金額']));
             if (!sub && p) sub = q * p;
             if (!p && sub) p = Math.round(sub / q * 100) / 100;
-            return { name: str(it.name), unit: str(it.unit, 10) || '個', quantity: q, unit_price: p, subtotal: sub };
-        });
-        var total = num(raw.total_amount) || items.reduce(function (s, it) { return s + it.subtotal; }, 0);
-        var date = str(raw.invoice_date || raw.date, 20);
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) date = '';
-        return { invoice_number: str(raw.invoice_number, 20).toUpperCase(), invoice_date: date, purpose: str(raw.purpose || raw.purpose_suggestion, 60),
-                 total_amount: total, items: items };
+            return { name: str(pick(it, ['name', 'item_name', 'product', 'description', '品名'])), unit: str(pick(it, ['unit', '單位']), 10) || '個', quantity: q, unit_price: p, subtotal: sub };
+        }).filter(function (it) { return it.name || it.subtotal; });
+        var total = num(pick(raw, ['total_amount', 'total', 'amount', 'totalAmount', '總金額'])) || items.reduce(function (s, it) { return s + it.subtotal; }, 0);
+        if (!total && !items.length) throw new Error('沒有金額也沒有品項');
+        var date = str(pick(raw, ['invoice_date', 'date', '日期']), 20).replace(/\//g, '-');
+        var m = /^(\d{2,3})-(\d{1,2})-(\d{1,2})$/.exec(date);
+        if (m) date = (+m[1] + 1911) + '-' + m[2] + '-' + m[3];
+        var d = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(date);
+        date = d ? d[1] + '-' + ('0' + d[2]).slice(-2) + '-' + ('0' + d[3]).slice(-2) : '';
+        var purpose = str(pick(raw, ['purpose', 'purpose_suggestion', '用途']), 60);
+        var filled = false;
+        if (!items.length) {
+            items = [{ name: purpose || '發票品項', unit: '式', quantity: 1, unit_price: total, subtotal: total }];
+            filled = true;
+        }
+        return { invoice_number: str(pick(raw, ['invoice_number', 'invoiceNo', 'invoice_no', '發票號碼']), 20).toUpperCase().replace(/\s/g, ''),
+                 invoice_date: date, purpose: purpose, total_amount: total, items: items, _filled: filled, _raw: raw };
     }
     async function receive(message, sess) {
         try {
@@ -6108,9 +6129,11 @@ $(function () {
             '<div class="d-flex justify-content-between mb-2 pb-2 border-bottom flex-wrap gap-2">' +
             '<span class="text-secondary fw-bold">用途說明：<span class="text-dark">' + e(d.purpose || '（未提供）') + '</span></span>' +
             '<span class="text-secondary fw-bold">總金額：<span class="text-danger fs-5">NT$ ' + d.total_amount.toLocaleString() + '</span></span></div>' +
+            (d._filled ? '<div class="alert alert-info py-1 small mb-2">ℹ️ 手機端沒有傳回品項明細，已用「' + e(d.items[0].name) + '」1 式代入，匯入後可到「憑證清單」編輯品項。</div>' : '') +
             (mismatch ? '<div class="alert alert-warning py-1 small mb-2">⚠️ 品項小計合計 ' + d._sum.toLocaleString() + ' 元，與總金額不符，匯入後請核對。</div>' : '') +
             '<table class="table table-sm table-bordered table-striped text-secondary mb-2" style="font-size:.85rem;"><thead class="table-light text-center"><tr>' +
             '<th>品名</th><th style="width:60px;">單位</th><th style="width:50px;">數量</th><th style="width:70px;">單價</th><th style="width:80px;">小計</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+            '<details class="small text-muted"><summary>查看手機傳來的原始資料</summary><pre class="bg-light p-2 mb-0" style="white-space:pre-wrap;max-height:200px;overflow:auto;">' + e(JSON.stringify(d._raw, null, 2)) + '</pre></details>' +
             '<div class="d-flex justify-content-end gap-2 mt-2">' +
             '<select class="form-select form-select-sm w-auto inv-cat" data-id="' + d._id + '"><option>業務費</option><option>人事費</option><option>行政管理費</option><option>設備及投資</option></select>' +
             '<button class="btn btn-sm btn-success fw-bold btn-direct-import" data-id="' + d._id + '">⬇️ 匯入憑證</button></div></div></div>';
