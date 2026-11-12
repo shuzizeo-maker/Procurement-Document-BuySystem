@@ -2,7 +2,7 @@
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購憑證自動生成系統 v4.4.4</title>
+    <title>採購憑證自動生成系統 v4.4.7</title>
     <!-- CSS 資源 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <script>
-var APP_VERSION = 'v4.4.4', APP_BUILD = '2026-11-12';
+var APP_VERSION = 'v4.4.7', APP_BUILD = '2026-11-12';
 var DEFAULT_MOE_CODE = '144676';   // 預設學校：臺東縣金峰鄉嘉蘭國民小學
 </script>
     <!-- 1. 臺東縣學校資料庫（內建） -->
@@ -276,7 +276,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 <body>
 
 <div class="container-fluid py-4" style="max-width: 1400px;" id="pcMainApp">
-    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.4</span></h3>
+    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.7</span></h3>
 
     <!-- 頁籤導覽列 (Tabs Header) -->
 <!-- 頁籤導覽列 (Tabs Header) -->
@@ -325,6 +325,19 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
                         <button class="btn btn-outline-primary btn-sm fw-bold" type="button" id="btnGoAiSettings">⚙️ 到「專案設定」修改金鑰與模型</button>
                     </div>
                     <div class="form-text small mt-1">金鑰、供應商與模型統一在「專案設定」分頁設定，發票辨識與核定公文判讀共用。</div>
+                    <button class="btn btn-outline-success btn-sm fw-bold mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#invManualPanel">🆓 沒有金鑰？用 Gemini 網頁辨識發票</button>
+                    <div class="collapse mt-2" id="invManualPanel">
+                        <div class="border border-success-subtle rounded p-3 bg-light">
+                            <ol class="small mb-2 ps-3">
+                                <li>按 <button class="btn btn-success btn-sm fw-bold py-0" type="button" id="btnCopyInvPrompt">📋 複製辨識提示詞</button></li>
+                                <li>打開 <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="fw-bold">Gemini 網頁</a>，上傳發票或收據照片（可一次一張），貼上提示詞後送出。</li>
+                                <li>按 Gemini 回覆中程式碼區塊右上角的「複製」，貼到下方，再按「填入表單」。</li>
+                            </ol>
+                            <textarea id="invPasteArea" class="form-control form-control-sm font-monospace mb-2" rows="4" placeholder="把 Gemini 的回覆貼在這裡（{ 開頭、} 結尾的資料）"></textarea>
+                            <button class="btn btn-success btn-sm fw-bold px-3" type="button" id="btnParsePastedInv">✅ 填入表單</button>
+                            <span class="form-text small ms-2">填入後請核對，再按「儲存採購憑證」。</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 右側：手機跨螢幕連線拍照 (MQTT) -->
@@ -3275,13 +3288,14 @@ function analyzeWithGemini25(dataUrl) {
 }
 
 function appendItemRow(name='', spec='', brand='', qty=1, unit='本', price=0, amt=0) {
+    function q(v) { return String(v === undefined || v === null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
     //'+spec+'  '+brand+'
 	
 	if(amt === 0 && price !== 0) amt = qty * price;
     const row = '<tr>' +
-        '<td><input type="text" class="form-control form-control-sm i-name" value="'+name+'"></td>' +
-        '<td><input type="text" class="form-control form-control-sm i-spec" value=""></td>' +
-        '<td><input type="text" class="form-control form-control-sm i-brand" value=""></td>' +
+        '<td><input type="text" class="form-control form-control-sm i-name" value="'+q(name)+'"></td>' +
+        '<td><input type="text" class="form-control form-control-sm i-spec" value="'+q(spec)+'"></td>' +
+        '<td><input type="text" class="form-control form-control-sm i-brand" value="'+q(brand)+'"></td>' +
         '<td><input type="number" class="form-control form-control-sm i-qty text-center" value="'+qty+'"></td>' +
         '<td><input type="text" class="form-control form-control-sm i-unit text-center" value="'+unit+'"></td>' +
         '<td><input type="number" class="form-control form-control-sm i-price text-end" value="'+price+'"></td>' +
@@ -4002,7 +4016,7 @@ function renderGeneralSheetJS(workbook, v, sheetIndex, currentSchool) {
         ['P', 15, '單 價'], ['R', 15, '總        價']
     ];
 
-    var itemsList = v.items || [];
+    var itemsList = voucherItemsForOutput(v);
     for (var m = 0; m < 10; m++) {
         var curRow = 16 + m;
         var itemData = itemsList[m];
@@ -4437,7 +4451,7 @@ function generateGeneralVoucherHtml(v, schoolName) {
     }
     if (strLen < 8 && (7 - strLen) >= 0) digits[7 - strLen] = '$';
 
-    var itemsList = v.items || [];
+    var itemsList = voucherItemsForOutput(v);
     var itemsCount = itemsList.length;
     var itemsHtml = '';
 
@@ -5775,21 +5789,10 @@ async function analyzeWithGemini25(dataUrl) {
     $('#loadingArea p').text(aiGetModel() + ' 正在辨識…');
     $('#btnExportExcel').prop('disabled', true);
 
-    var promptText = '你是一位精準的台灣學校會計與總務主任助理。請仔細看這張發票或收據，擷取文字資訊並輸出為標準的 JSON 格式。\n' +
-        '請特別注意：你必須根據每個品項的名稱，自動推論產出適當且合理的「繁體中文單位」（例如：個、包、本、支、台、箱、張等），不可填數字或英文字。不要包含任何 markdown 標記。\n\n' +
-        '期望的 JSON 格式：\n{\n  "date": "購買日期 (格式 YYYY-MM-DD)",\n  "invoice_number": "發票或收據號碼 (如大寫英文字母+8位數字，若無則填空字串)",\n' +
-        '  "purpose_suggestion": "建議的用途說明簡稱 (如 研習講義、辦公文具)",\n  "items": [\n    {\n      "name": "品名 (不含規格)",\n      "specification": "型號或包裝規格",\n' +
-        '      "brand": "廠牌 (若無則空字串)",\n      "quantity": 1,\n      "unit": "本",\n      "unit_price": 100,\n      "amount": 100\n    }\n  ]\n}';
+    var promptText = invoicePrompt();
     try {
         var data = aiParseJson(await aiGenerate(promptText, mimeType, base64Data, 'invoice'));
-        if (data.invoice_number) $('#invNo').val(data.invoice_number);
-        if (data.date) { $('#invoiceDate').val(data.date); $('#applyDate').val(data.date); }
-        if (data.purpose_suggestion) $('#purPurpose').val(data.purpose_suggestion);
-        $('#itemRows').empty();
-        if (data.items && data.items.length > 0) {
-            data.items.forEach(function (item) { appendItemRow(item.name, item.specification, item.brand, item.quantity, item.unit, item.unit_price, item.amount); });
-        } else { appendItemRow(); }
-        calculateTotal();
+        fillInvoiceForm(data);
     } catch (e) {
         $('#btnStartAnalyze').prop('disabled', false).text('🚀 辨識失敗，點擊重新分析');
         showToast('❌ ' + e.message, 'danger');
@@ -5820,11 +5823,80 @@ $(function () {
     });
 });
 
+
+// ---------- 發票：共用提示詞與填表（金鑰辨識、Gemini 網頁貼上共用） ----------
+function invoicePrompt() {
+    return '你是一位精準的台灣學校會計與總務主任助理。請仔細看這張發票或收據，擷取文字資訊並輸出為標準的 JSON 格式。\n' +
+        '請特別注意：你必須根據每個品項的名稱，自動推論產出適當且合理的「繁體中文單位」（例如：個、包、本、支、台、箱、張等），不可填數字或英文字。不要包含任何 markdown 標記。\n\n' +
+        '期望的 JSON 格式：\n{\n  "date": "購買日期 (格式 YYYY-MM-DD)",\n  "invoice_number": "發票或收據號碼 (如大寫英文字母+8位數字，若無則填空字串)",\n' +
+        '  "purpose_suggestion": "建議的用途說明簡稱 (如 研習講義、辦公文具)",\n  "items": [\n    {\n      "name": "品名 (不含規格)",\n      "specification": "型號或包裝規格",\n' +
+        '      "brand": "廠牌 (若無則空字串)",\n      "quantity": 1,\n      "unit": "本",\n      "unit_price": 100,\n      "amount": 100\n    }\n  ]\n}';
+}
+function fillInvoiceForm(data) {
+    function n(v) { var x = parseFloat(String(v === undefined || v === null ? '' : v).replace(/[,，元\s]/g, '')); return isFinite(x) ? x : ''; }
+    var no = data.invoice_number || data.invoiceNo || '';
+    var date = String(data.date || data.invoice_date || '').replace(/\//g, '-');
+    var roc = /^(\d{2,3})-(\d{1,2})-(\d{1,2})$/.exec(date);
+    if (roc) date = (+roc[1] + 1911) + '-' + ('0' + roc[2]).slice(-2) + '-' + ('0' + roc[3]).slice(-2);
+    if (no) $('#invNo').val(String(no).toUpperCase().replace(/\s/g, ''));
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) { $('#invoiceDate').val(date); $('#applyDate').val(date); }
+    var purpose = data.purpose_suggestion || data.purpose || '';
+    if (purpose) $('#purPurpose').val(purpose);
+    $('#itemRows').empty();
+    var items = Array.isArray(data.items) ? data.items : [];
+    items.forEach(function (it) {
+        var q = n(it.quantity !== undefined ? it.quantity : it.qty) || 1;
+        var p = n(it.unit_price !== undefined ? it.unit_price : it.price);
+        var a = n(it.amount !== undefined ? it.amount : it.subtotal);
+        if (a === '' && p !== '') a = q * p;
+        if (p === '' && a !== '') p = Math.round(a / q * 100) / 100;
+        appendItemRow(it.name || it.item_name || '', it.specification || '', it.brand || '', q, it.unit || '個', p, a);
+    });
+    var total = n(data.total_amount);
+    if (!items.length) {
+        if (total) appendItemRow(purpose || '採購品項', '', '', 1, '式', total, total);
+        else appendItemRow();
+    }
+    calculateTotal();
+    return items.length;
+}
+$(function () {
+    $('#btnCopyInvPrompt').on('click', function () {
+        var text = invoicePrompt().replace('不要包含任何 markdown 標記。', '請把 JSON 放在一個 ```json 程式碼區塊中，不要其他說明。');
+        (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+            .then(function () { showToast('✅ 已複製辨識提示詞，請到 Gemini 上傳發票照片並貼上。'); })
+            .catch(function () { window.prompt('請手動複製以下提示詞：', text); });
+    });
+    $('#btnParsePastedInv').on('click', function () {
+        var t = $('#invPasteArea').val().trim();
+        if (!t) return showToast('請先貼上 Gemini 的回覆。', 'warning');
+        var data;
+        try { data = aiParseJson(t); } catch (e) { return showToast('❌ 看不懂貼上的內容，請複製 Gemini 回覆中 { 開頭、} 結尾的整段資料。', 'danger'); }
+        var cnt = fillInvoiceForm(data);
+        $('#invPasteArea').val('');
+        showToast(cnt ? '✅ 已填入 ' + cnt + ' 個品項，請核對後按「儲存採購憑證」。' : 'ℹ️ 沒有讀到品項，已用用途說明 1 式代入，請核對。', cnt ? 'success' : 'warning');
+    });
+});
+
 </script>
 
 <div class="modal fade" id="versionModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h5 class="modal-title fw-bold">📌 版本紀錄</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body small">
+    <h6 class="fw-bold text-primary">v4.4.7（2026-11-12）</h6>
+    <ul>
+      <li>辨識到的規格與廠牌會自動填入品項表（金鑰辨識、Gemini 網頁、手機發票辨識皆適用），仍可手動修改。</li>
+      <li>修正：編輯既有憑證時，原本存好的規格與廠牌不會顯示，再存檔會被清空。</li>
+      <li>品名含引號等符號時不再造成表單錯亂。</li>
+    </ul>
+    <h6 class="fw-bold text-primary">v4.4.6（2026-11-12）</h6>
+    <ul>
+      <li>「採購憑證」分頁新增免金鑰的「Gemini 網頁辨識發票」：電腦上的發票照片可直接到 Gemini 辨識，再把回覆貼回表單，不必先傳到手機。</li>
+    </ul>
+    <h6 class="fw-bold text-primary">v4.4.5（2026-11-12）</h6>
+    <ul>
+      <li>修正：舊版匯入、沒有品項的憑證，下載 Excel 或列印時請購單仍是空白。現在會以「用途說明 1 式」填入並提醒，建議再到憑證清單補上實際品項。</li>
+    </ul>
     <h6 class="fw-bold text-primary">v4.4.4（2026-11-12）</h6>
     <ul>
       <li>核定公文判讀新增免金鑰方式：複製提示詞到 Gemini 網頁判讀，再把回覆貼回系統核對代入（PDF 或圖片皆可）。</li>
@@ -5873,7 +5945,7 @@ $(function () {
   "invoice_date": "YYYY-MM-DD（民國年請加 1911 轉成西元）",
   "purpose": "建議的用途說明簡稱，例如 辦公文具、研習講義",
   "total_amount": 總金額（數字）,
-  "items": [ { "name": "品名", "unit": "繁體中文單位，例如 個、包、本、支、盒", "quantity": 數量, "unit_price": 單價, "subtotal": 小計 } ]
+  "items": [ { "name": "品名（不含規格）", "specification": "型號或規格，沒有就填空字串", "brand": "廠牌，沒有就填空字串", "unit": "繁體中文單位，例如 個、包、本、支、盒", "quantity": 數量, "unit_price": 單價, "subtotal": 小計 } ]
 }
 3. 辨識結果以卡片顯示，欄位都可以在手機上修改、可刪除品項，按「傳送到電腦」才送出。
 4. 傳送方式：用 fetch 以 POST 把 JSON 文字送到 ntfy.sh（body 是純文字，不要加任何 header）：
@@ -6126,7 +6198,7 @@ $(function () {
             var sub = num(pick(it, ['subtotal', 'amount', 'total', 'sum', '小計', '金額']));
             if (!sub && p) sub = q * p;
             if (!p && sub) p = Math.round(sub / q * 100) / 100;
-            return { name: str(pick(it, ['name', 'item_name', 'product', 'description', '品名'])), unit: str(pick(it, ['unit', '單位']), 10) || '個', quantity: q, unit_price: p, subtotal: sub };
+            return { name: str(pick(it, ['name', 'item_name', 'product', 'description', '品名'])), specification: str(pick(it, ['specification', 'spec', '規格'])), brand: str(pick(it, ['brand', '廠牌'])), unit: str(pick(it, ['unit', '單位']), 10) || '個', quantity: q, unit_price: p, subtotal: sub };
         }).filter(function (it) { return it.name || it.subtotal; });
         var total = num(pick(raw, ['total_amount', 'total', 'amount', 'totalAmount', '總金額'])) || items.reduce(function (s, it) { return s + it.subtotal; }, 0);
         if (!total && !items.length) throw new Error('沒有金額也沒有品項');
@@ -6208,7 +6280,7 @@ $(function () {
             applyDate: day, invoiceDate: day, verifyDate: day,
             category: $('.inv-cat[data-id="' + id + '"]').val() || '業務費', budget: '',
             purpose: inv.purpose, invNo: inv.invoice_number, totalAmt: inv.total_amount,
-            items: inv.items.map(function (it) { return { name: it.name, specification: '', brand: '', quantity: it.quantity, unit: it.unit, price: it.unit_price, amount: it.subtotal }; })
+            items: inv.items.map(function (it) { return { name: it.name, specification: it.specification || '', brand: it.brand || '', quantity: it.quantity, unit: it.unit, price: it.unit_price, amount: it.subtotal }; })
         });
         localStorage.setItem('school_voucher_list', JSON.stringify(list));
         if (typeof loadVoucherList === 'function') loadVoucherList();
@@ -6230,6 +6302,32 @@ $(function () {
     window.__invTest = { receive: function (m) { return receive(m, session); }, session: function () { return session; } };
 });
 
+</script>
+<script>
+// 一般憑證沒有任何品項、但有金額時（例如舊版匯入的發票），輸出時以「用途說明 1 式」代入，避免請購單空白
+function voucherItemsForOutput(v) {
+    var items = (v && v.items) ? v.items.filter(function (it) { return it && ((it.name || '').trim() || Number(it.amount)); }) : [];
+    var total = Number(v && v.totalAmt) || 0;
+    if (!items.length && total) {
+        return [{ name: (v.purpose || '').trim() || '採購品項', specification: '', brand: '', quantity: 1, unit: '式', price: total, amount: total }];
+    }
+    return items.length ? items : ((v && v.items) || []);
+}
+function vouchersMissingItems() {
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('school_voucher_list') || '[]'); } catch (e) { }
+    return (Array.isArray(list) ? list : []).filter(function (v) {
+        var general = !v.voucherType || v.voucherType === (typeof VOUCHER_TYPES !== 'undefined' ? VOUCHER_TYPES.GENERAL : 'GENERAL');
+        return general && !v.hourlyDetails && Number(v.totalAmt) && !(v.items || []).some(function (it) { return it && (it.name || '').trim(); });
+    });
+}
+$(function () {
+    $('#btnExportExcel').on('click', function () {
+        var miss = vouchersMissingItems();
+        if (miss.length) setTimeout(function () { showToast('ℹ️ 有 ' + miss.length + ' 張憑證沒有品項，已用「用途說明 1 式」填入請購單：' +
+            miss.map(function (v) { return '#' + v.id + ' ' + (v.purpose || ''); }).join('、') + '。建議到憑證清單補上實際品項。', 'warning'); }, 3000);
+    });
+});
 </script>
 </body>
 </html>
