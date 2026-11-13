@@ -2,7 +2,7 @@
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購憑證自動生成系統 v4.4.8</title>
+    <title>採購憑證自動生成系統 v4.5.0</title>
     <!-- CSS 資源 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <script>
-var APP_VERSION = 'v4.4.8', APP_BUILD = '2026-11-13';
+var APP_VERSION = 'v4.5.0', APP_BUILD = '2026-11-13';
 var DEFAULT_MOE_CODE = '144676';   // 預設學校：臺東縣金峰鄉嘉蘭國民小學
 </script>
     <!-- 1. 臺東縣學校資料庫（內建） -->
@@ -27,8 +27,8 @@ var SCHOOL_DATABASE = {"144322":{"simpCode":"401","taxId":"","shortName":"蘭嶼
     <!-- 2. 經費結報表 Excel 匯出（內建） -->
     <script>
 // ==========================================
-// 📑 臺東縣政府教育發展基金補助【簡化方案】經費結報表（ExcelJS 重建版）
-// 版面依「第四次修正版 114/06/26」格式
+// 📑 臺東縣政府教育發展基金補助【簡化方案】經費結報表
+// 版面、字型、文字依縣府正式檔（第四次修正版 114/06/26）
 // ==========================================
 function renderSettlementSheetJS(workbook, data, currentSchool) {
     data = data || (typeof getSettlementFormData === 'function' ? getSettlementFormData() : { categories: {}, statusCheck: {} });
@@ -41,29 +41,29 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
         pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 1,
                      horizontalCentered: true, margins: { left: 0.3, right: 0.3, top: 0.39, bottom: 0.39, header: 0.2, footer: 0.2 } }
     });
-    var widths = [4.5, 12, 3.8, 7, 11, 16, 15.8, 14.8, 16, 16.2, 15.3, 16, 16.7, 15.5, 15.3, 13.3];
-    ws.columns = widths.map(function (w) { return { width: w }; });
-    var heights = { 1: 31.2, 2: 31.2, 3: 37, 4: 37, 5: 37, 6: 37, 7: 19, 8: 28.8, 9: 30.6, 10: 30.6, 11: 30.6, 12: 23.4, 13: 48, 14: 24, 15: 24,
-                    17: 42, 18: 30.6, 19: 30.6, 20: 30.6, 21: 23.4, 22: 46.8, 23: 24, 24: 24, 26: 48 };
+    ws.columns = [4.4, 11.9, 3.8, 7, 10.9, 16.1, 15.8, 14.8, 16.1, 16.2, 15.3, 16.1, 16.8, 14.2, 15.1, 13.3].map(function (w) { return { width: w }; });
+    var heights = { 1: 32.2, 2: 24.8, 3: 26.2, 4: 29.2, 5: 25.5, 6: 29.2, 7: 18, 8: 30, 9: 28.5, 10: 29.2, 11: 30, 12: 24, 13: 51.8, 14: 24, 15: 24, 16: 6.8,
+                    17: 36.8, 18: 35.2, 19: 27.8, 20: 30, 21: 24, 22: 51, 23: 24, 24: 24, 25: 11.2, 26: 24, 27: 15, 28: 15.9, 29: 15.9, 30: 15.9,
+                    31: 15.9, 32: 15.9, 33: 15.9, 34: 15.9 };
     Object.keys(heights).forEach(function (r) { ws.getRow(+r).height = heights[r]; });
 
-    var FONT = '微軟正黑體';
-    function put(addr, val, opt) {
-        opt = opt || {};
+    var JH = '微軟正黑體', KAI = '標楷體', NUMFMT = '#,##0_);[Red]\\(#,##0\\)';
+    function put(addr, val, o) {
+        o = o || {};
         var c = ws.getCell(addr);
         c.value = val;
-        c.font = { name: FONT, size: opt.size || 10, bold: !!opt.bold };
-        c.alignment = { horizontal: opt.h || 'center', vertical: 'middle', wrapText: opt.wrap !== false };
-        if (opt.num) c.numFmt = '#,##0';
+        c.font = { name: o.font || JH, size: o.size || 12, bold: !!o.bold };
+        c.alignment = { horizontal: o.h || 'center', vertical: 'middle', wrapText: !!o.wrap };
+        if (o.num) c.numFmt = NUMFMT;
         return c;
     }
-    function merge(range) { ws.mergeCells(range); }
+    function money(addr, val) { return put(addr, val, { size: 12, bold: true, h: 'right', num: true }); }
+    function merge(r) { ws.mergeCells(r); }
     function box(c1, r1, c2, r2) {
-        for (var r = r1; r <= r2; r++) for (var c = c1; c <= c2; c++) {
+        for (var r = r1; r <= r2; r++) for (var c = c1; c <= c2; c++)
             ws.getCell(r, c).border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-        }
     }
-    function thick(c1, r1, c2, r2) { // 外框加粗
+    function thick(c1, r1, c2, r2) {
         for (var r = r1; r <= r2; r++) for (var c = c1; c <= c2; c++) {
             var cell = ws.getCell(r, c), b = Object.assign({}, cell.border || {});
             if (r === r1) b.top = { style: 'thick' };
@@ -80,146 +80,141 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
     function chk(on) { return on ? '■' : '□'; }
 
     // ---------- 標題與基本資料 ----------
-    merge('A1:P1'); put('A1', '臺東縣政府教育發展基金補助【簡化方案】經費結報表', { size: 16, wrap: false });
+    merge('A1:P1'); put('A1', '臺東縣政府教育發展基金補助【簡化方案】經費結報表', { font: KAI, size: 22, bold: true });
 
     var simp = v('simpCodeInput');
-    var schoolShow = v('schoolShortNameInput') || v('schoolNameInput') || currentSchool || '';
-    merge('A2:B2'); put('A2', '學校代碼', { bold: true });
-    merge('C2:D2'); put('C2', simp, { bold: true });
-    put('E2', '學校名稱', { bold: true });
-    merge('F2:H2'); put('F2', schoolShow, { size: 11, h: 'left' });
+    merge('A2:B2'); put('A2', '學校代碼', { wrap: true });
+    merge('C2:D2'); put('C2', /^\d+$/.test(simp) ? Number(simp) : simp, { size: 16, bold: true });
+    put('E2', '學校名稱', { h: 'right' });
+    merge('F2:H2'); put('F2', v('schoolShortNameInput') || currentSchool || v('schoolNameInput'), { size: 16, h: 'left' });
     merge('I2:L3');
-    put('I2', '(請勾選)' + chk(type === 'SINGLE') + '一次性結報' + chk(type === 'BATCH') + '分批結報', { size: 14 });
-    merge('M2:N2'); put('M2', '***以下欄位必勾選', { bold: true, h: 'left' });
-    merge('O2:P2'); put('O2', '單位：新台幣元', { bold: true, h: 'left' });
+    put('I2', '(請勾選) ' + chk(type !== 'BATCH') + '一次性結報' + chk(type === 'BATCH') + '分批結報', { font: KAI, size: 20, bold: true });
+    put('M2', '***以下欄位必勾選', { font: KAI, size: 14, bold: true, h: 'left' });
+    merge('O2:P2'); put('O2', '單位：新台幣元', { font: KAI, size: 16, bold: true, h: 'right' });
 
-    merge('A3:B3'); put('A3', '所屬年度', { bold: true });
-    merge('C3:D3'); put('C3', v('projYear'), { size: 11 });
-    put('E3', '計畫期程', { bold: true });
-    merge('F3:H3'); put('F3', v('projPeriod'), { size: 11, h: 'left' });
+    merge('A3:B3'); put('A3', '所屬年度');
+    merge('C3:D3'); put('C3', v('projYear'), { size: 16, bold: true, h: 'left' });
+    put('E3', '計畫期程', { h: 'right' });
+    merge('F3:H3'); put('F3', v('projPeriod'), { size: 16, bold: true, h: 'left' });
 
-    merge('A4:B4'); put('A4', '應付代收款\n簡化代碼', { bold: true });
-    merge('C4:D4'); put('C4', '2123-' + v('projSubItemCode'), { bold: true });
-    merge('E4:H4');
-    merge('A5:B5'); put('A5', '簡化名稱', { bold: true });
-    merge('C5:L5'); put('C5', v('projSubItemName'), { size: 11, h: 'left' });
-    merge('A6:B6'); put('A6', '臺東縣政府核定\n函日期文號', { bold: true });
-    merge('C6:L6'); put('C6', [rocDate(v('projIncomingDate')), v('projDispatchNo')].filter(Boolean).join('　'), { size: 11, h: 'left' });
+    merge('A4:B4'); put('A4', '應付代收款\n子目編號', { wrap: true });
+    put('C4', ' 2123-', { size: 16, bold: true, h: 'left' });
+    put('E4', v('projSubItemCode'), { size: 16, bold: true, h: 'left' });
+    merge('A5:B5'); put('A5', '簡化名稱');
+    merge('C5:L5'); put('C5', v('projSubItemName'), { h: 'left' });
+    merge('A6:B6'); put('A6', '臺東縣政府核定\n函日期文號', { wrap: true });
+    var dispatch = v('projDispatchNo');
+    var dateNo = rocDate(v('projIncomingDate')) + dispatch;
+    if (dispatch && !/函$/.test(dispatch)) dateNo += '函';
+    merge('C6:L6'); put('C6', dateNo, { h: 'left' });
 
     var isAdv = (st.isAdvance === '預撥');
-    put('M3', '1.經費預撥情形', { size: 11, h: 'left' }); merge('N3:P3');
-    put('N3', chk(isAdv) + '預撥　' + chk(!isAdv) + '不預撥', { size: 11, h: 'left' });
-    put('M4', '2.本案', { size: 11, h: 'left' }); merge('N4:P4');
-    put('N4', chk(st.execByPlan !== '否') + '是　' + chk(st.execByPlan === '否') + '不是　確實依計畫執行', { size: 11, h: 'left' });
-    put('M5', '3.物品及財產', { size: 11, h: 'left' }); merge('N5:P5');
-    put('N5', chk(st.hasPropertyLog === '無') + '無　' + chk(st.hasPropertyLog === '是') + '是　' + chk(st.hasPropertyLog === '否') + '否　確實登帳', { size: 11, h: 'left' });
-    put('M6', '4.本案經費', { size: 11, h: 'left' }); merge('N6:P6');
-    put('N6', chk(st.hasBudgetAdjust === '是') + '是　' + chk(st.hasBudgetAdjust !== '是') + '不是　經費項目間調整支應', { size: 11, h: 'left' });
-    box(1, 2, 8, 6); box(13, 2, 16, 6); box(9, 2, 12, 6);
-    ws.getCell('I2').border = {};  // 勾選區原表無框
+    var opt = { size: 14, bold: true, h: 'left' };
+    put('M3', '1.經費預撥情形', { size: 13, bold: true, h: 'left' }); put('N3', chk(isAdv) + '預撥     ' + chk(!isAdv) + '不預撥', opt);
+    put('M4', '2.本案', { size: 13, bold: true, h: 'left' });
+    put('N4', ' ' + chk(st.execByPlan !== '否') + '是        ' + chk(st.execByPlan === '否') + '否 確實依計畫執行', opt);
+    put('M5', '3.物品及財產 ', { size: 13, bold: true, h: 'left' });
+    put('N5', ' ' + chk(st.hasPropertyLog !== '是' && st.hasPropertyLog !== '否') + '無      ' + chk(st.hasPropertyLog === '是') + '是      ' +
+              chk(st.hasPropertyLog === '否') + '否 確實登帳', opt);
+    put('M6', '4.本案經費 ', { size: 13, bold: true, h: 'left' });
+    put('N6', chk(st.hasBudgetAdjust === '是') + '是      ' + chk(st.hasBudgetAdjust !== '是') + '否 經費項目間調整支應', opt);
+    box(1, 2, 8, 6);
 
     // ---------- (不預撥) 區塊 ----------
-    merge('A7:C8'); put('A7', '(不預撥)經費類別', { bold: true });
-    merge('D7:G7'); put('D7', '一次性結報', { bold: true });
-    merge('H7:M7'); put('H7', '分批結報', { bold: true });
-    merge('N7:N8'); put('N7', '支出(轉帳)\n傳票號碼', { size: 9 });
-    merge('O7:O8'); put('O7', '財產(物品)編號\n(必填)', { size: 9 });
-    merge('P7:P8'); put('P7', '備註', { bold: true });
-    merge('D8:E8'); put('D8', '核定計畫金額', { bold: true });
-    put('F8', '撥付金額', { bold: true }); put('G8', '實支金額', { bold: true });
-    ['核定計畫金額(A)', '截至本期\n撥付金額(B=C)', '截至上期\n結報數(C1)', '本期結報數\n(C2)', '已撥付結報數(C=C1+C2)', '尚需繼續\n執行數(D=B-C)']
-        .forEach(function (t, i) { put(ws.getCell(8, 8 + i).address, t, { size: 9 }); });
+    var H = { size: 11, bold: true, wrap: true };
+    merge('A7:C8'); put('A7', '(不預撥)經費類別', { size: 12, bold: true, wrap: true });
+    merge('D7:G7'); put('D7', '一次性結報', H);
+    merge('H7:M7'); put('H7', '分批結報', H);
+    merge('N7:N8'); put('N7', '支出(轉帳)\n傳票號碼', H);
+    merge('O7:O8'); put('O7', '財產(物品)編號\n(必填)', H);
+    merge('P7:P8'); put('P7', '備註', H);
+    merge('D8:E8'); put('D8', '核定計畫金額', H);
+    put('F8', '撥付金額', H); put('G8', '實支金額', H);
+    ['核定計畫金額(A)', '截至本期\n撥付金額(B=C)', '截至上期\n結報數(C1)', '本期結報數\n(C2)', '已撥付結報數(C=C1+C2)', '尚需繼續\n執行數(D=A-C)']
+        .forEach(function (t, i) { put(ws.getCell(8, 8 + i).address, t, H); });
 
-    var rowsN = [['personnel', 9, '一、計畫補助人事費 (無則免填)'], ['business', 10, '二、業務費'], ['admin', 11, '三、行政管理費']];
-    merge('A9:A11'); put('A9', '經常門', { bold: true });
-    rowsN.forEach(function (x) { merge('B' + x[1] + ':C' + x[1]); put('B' + x[1], x[2], { size: 9, h: 'left' }); merge('D' + x[1] + ':E' + x[1]); });
+    var rowsN = [['personnel', 9, '一、計畫補助人事   \n        費 (無則免填)'], ['business', 10, '二、業務費'], ['admin', 11, '三、行政管理費']];
+    merge('A9:A11'); put('A9', '經常門', { bold: true, wrap: true });
+    rowsN.forEach(function (x) { merge('B' + x[1] + ':C' + x[1]); put('B' + x[1], x[2], H); merge('D' + x[1] + ':E' + x[1]); });
     merge('A12:C12'); put('A12', '小            計', { bold: true }); merge('D12:E12');
-    put('A13', '資本門', { size: 9 }); merge('B13:C13'); put('B13', '設備及投資', { bold: true }); merge('D13:E13');
+    put('A13', '資本門', { bold: true, wrap: true }); merge('B13:C13'); put('B13', '設備及投資', { bold: true }); merge('D13:E13');
     merge('A14:C14'); put('A14', '小            計', { bold: true }); merge('D14:E14');
-    merge('A15:C15'); put('A15', '合     計     數', { bold: true }); merge('D15:E15');
+    merge('A15:C15'); put('A15', '合     計     數', { bold: true, wrap: true }); merge('D15:E15');
     merge('N9:N15'); merge('O9:O15'); merge('P9:P15');
 
     var dataRowsN = rowsN.concat([['equipment', 13]]);
-    var nonAdv = (type !== 'ADVANCE');
-    if (nonAdv) {
-        put('N9', data.voucherNo || '', { size: 10 });
-        put('O9', data.propertyNo || '', { size: 10 });
-        put('P9', data.note || '', { size: 10 });
+    if (type !== 'ADVANCE') {
+        put('N9', data.voucherNo || '', { size: 11, bold: true, wrap: true });
+        put('O9', data.propertyNo || '', { size: 11, bold: true, wrap: true });
+        put('P9', data.note || '', { font: KAI, wrap: true });
     }
-    if (type === 'SINGLE') {
-        dataRowsN.forEach(function (x) {
-            var c = cats[x[0]] || {};
-            put('D' + x[1], c.approved || 0, { size: 11, h: 'right', num: true });
-            put('F' + x[1], c.currentAmount || 0, { size: 11, h: 'right', num: true });
-            put('G' + x[1], c.currentAmount || 0, { size: 11, h: 'right', num: true });
-        });
-        ['D', 'F', 'G'].forEach(function (col) {
-            put(col + '12', { formula: 'SUM(' + col + '9:' + col + '11)' }, { size: 11, h: 'right', num: true });
-            put(col + '14', { formula: col + '13' }, { size: 11, h: 'right', num: true });
-            put(col + '15', { formula: col + '12+' + col + '14' }, { size: 11, h: 'right', num: true });
-        });
-    } else if (type === 'BATCH') {
-        dataRowsN.forEach(function (x) {
-            var c = cats[x[0]] || {}, r = x[1];
-            put('H' + r, c.approved || 0, { size: 11, h: 'right', num: true });
-            put('I' + r, { formula: 'L' + r }, { size: 11, h: 'right', num: true });
-            put('J' + r, c.prevAmount || 0, { size: 11, h: 'right', num: true });
-            put('K' + r, c.currentAmount || 0, { size: 11, h: 'right', num: true });
-            put('L' + r, { formula: 'J' + r + '+K' + r }, { size: 11, h: 'right', num: true });
-            put('M' + r, { formula: 'H' + r + '-L' + r }, { size: 11, h: 'right', num: true });
-        });
-        ['H', 'I', 'J', 'K', 'L', 'M'].forEach(function (col) {
-            put(col + '12', { formula: 'SUM(' + col + '9:' + col + '11)' }, { size: 11, h: 'right', num: true });
-            put(col + '14', { formula: col + '13' }, { size: 11, h: 'right', num: true });
-            put(col + '15', { formula: col + '12+' + col + '14' }, { size: 11, h: 'right', num: true });
-        });
-    }
+    dataRowsN.forEach(function (x) {
+        var c = cats[x[0]] || {}, r = x[1];
+        if (type === 'SINGLE') {
+            money('D' + r, c.approved || 0); money('F' + r, c.currentAmount || 0); money('G' + r, c.currentAmount || 0);
+        } else if (type === 'BATCH') {
+            money('H' + r, c.approved || 0);
+            money('I' + r, { formula: 'L' + r });
+            money('J' + r, c.prevAmount || 0);
+            money('K' + r, c.currentAmount || 0);
+            money('L' + r, { formula: 'J' + r + '+K' + r });
+            money('M' + r, { formula: 'H' + r + '-L' + r });
+        }
+    });
+    ['D', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'].forEach(function (col) {
+        money(col + '12', { formula: 'SUM(' + col + '9:' + col + '11)' });
+        money(col + '14', { formula: 'SUM(' + col + '13)' });
+        money(col + '15', { formula: col + '12+' + col + '14' });
+    });
     box(1, 7, 16, 15);
     thick(1, 7, 16, 15); thick(4, 7, 7, 15); thick(8, 7, 13, 15); thick(14, 9, 14, 15);
 
     // ---------- (預撥) 區塊 ----------
-    merge('A17:C17'); put('A17', '(預撥)經費類別', { bold: true });
-    merge('D17:E17'); put('D17', '核定計畫金額(A)', { size: 9 });
-    ['截至本期\n預撥金額(B)', '截至上期\n結報金額( C ) ', '本期結報數\n(D)', '合計結報數\nE=C+D', '計畫結餘款\n(F=B-E)', '已繳回本府\n賸餘款(G)', '截至本期尚未繳回本府賸餘款(H=F-G)', '支出(轉帳)\n傳票號碼', '財產(物品)編號\n(必填)', '備註']
-        .forEach(function (t, i) { put(ws.getCell(17, 6 + i).address, t, { size: 9 }); });
-    var rowsA = [['personnel', 18, '一、計畫補助人事費 (無則免填)'], ['business', 19, '二、業務費'], ['admin', 20, '三、行政管理費']];
-    merge('A18:A20'); put('A18', '經常門', { bold: true });
-    rowsA.forEach(function (x) { merge('B' + x[1] + ':C' + x[1]); put('B' + x[1], x[2], { size: 9, h: 'left' }); merge('D' + x[1] + ':E' + x[1]); });
+    merge('A17:C17'); put('A17', '(預撥)經費類別', { size: 10, bold: true, wrap: true });
+    merge('D17:E17'); put('D17', '核定計畫金額(A)', { bold: true, wrap: true });
+    ['截至本期\n預撥金額(B)', '截至上期\n結報金額( C ) ', '本期結報數\n(D)', '合計結報數\nE=C+D', '計畫結餘款\n(F=B-E)', '已繳回本府\n賸餘款(G)', '截至本期尚未繳回本府賸餘款(H=F-G)']
+        .forEach(function (t, i) { put(ws.getCell(17, 6 + i).address, t, { size: i === 6 ? 10 : 12, bold: true, wrap: true }); });
+    put('M17', '支出(轉帳)\n傳票號碼', H); put('N17', '財產(物品)編號\n(必填)', H); put('O17', '備註', H);
+    var rowsA = [['personnel', 18, '一、計畫補助人事   \n        費 (無則免填)'], ['business', 19, '二、業務費'], ['admin', 20, '三、行政管理費']];
+    merge('A18:A20'); put('A18', '經常門', { bold: true, wrap: true });
+    rowsA.forEach(function (x) { merge('B' + x[1] + ':C' + x[1]); put('B' + x[1], x[2], H); merge('D' + x[1] + ':E' + x[1]); });
     merge('A21:C21'); put('A21', '小            計', { bold: true }); merge('D21:E21');
-    put('A22', '資本門', { size: 9 }); merge('B22:C22'); put('B22', '設備及投資', { bold: true }); merge('D22:E22');
+    put('A22', '資本門', { bold: true, wrap: true }); merge('B22:C22'); put('B22', '設備及投資', { bold: true }); merge('D22:E22');
     merge('A23:C23'); put('A23', '小            計', { bold: true }); merge('D23:E23');
-    merge('A24:C24'); put('A24', '合     計     數', { bold: true }); merge('D24:E24');
+    merge('A24:C24'); put('A24', '合     計     數', { bold: true, wrap: true }); merge('D24:E24');
     merge('M18:M24'); merge('N18:N24'); merge('O18:O24');
+    rowsA.concat([['equipment', 22]]).forEach(function (x) {
+        var c = cats[x[0]] || {}, r = x[1];
+        if (type === 'ADVANCE') {
+            money('D' + r, c.approved || 0);
+            money('F' + r, c.advance || 0);
+            money('G' + r, c.prevAmount || 0);
+            money('H' + r, c.currentAmount || 0);
+            money('K' + r, c.returnAmount || 0);
+        }
+        money('I' + r, { formula: 'G' + r + '+H' + r });
+        money('J' + r, { formula: 'F' + r + '-I' + r });
+        money('L' + r, { formula: 'J' + r + '-K' + r });
+    });
+    ['D', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].forEach(function (col) {
+        money(col + '21', { formula: 'SUM(' + col + '18:' + col + '20)' });
+        money(col + '23', { formula: 'SUM(' + col + '22)' });
+        money(col + '24', { formula: col + '21+' + col + '23' });
+    });
     if (type === 'ADVANCE') {
-        rowsA.concat([['equipment', 22]]).forEach(function (x) {
-            var c = cats[x[0]] || {}, r = x[1];
-            put('D' + r, c.approved || 0, { size: 11, h: 'right', num: true });
-            put('F' + r, c.advance || 0, { size: 11, h: 'right', num: true });
-            put('G' + r, c.prevAmount || 0, { size: 11, h: 'right', num: true });
-            put('H' + r, c.currentAmount || 0, { size: 11, h: 'right', num: true });
-            put('I' + r, { formula: 'G' + r + '+H' + r }, { size: 11, h: 'right', num: true });
-            put('J' + r, { formula: 'F' + r + '-I' + r }, { size: 11, h: 'right', num: true });
-            put('K' + r, c.returnAmount || 0, { size: 11, h: 'right', num: true });
-            put('L' + r, { formula: 'J' + r + '-K' + r }, { size: 11, h: 'right', num: true });
-        });
-        ['D', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].forEach(function (col) {
-            put(col + '21', { formula: 'SUM(' + col + '18:' + col + '20)' }, { size: 11, h: 'right', num: true });
-            put(col + '23', { formula: col + '22' }, { size: 11, h: 'right', num: true });
-            put(col + '24', { formula: col + '21+' + col + '23' }, { size: 11, h: 'right', num: true });
-        });
-        put('M18', data.voucherNo || '', { size: 10 });
-        put('N18', data.propertyNo || '', { size: 10 });
-        put('O18', data.note || '', { size: 10 });
+        put('M18', data.voucherNo || '', { size: 11, bold: true, wrap: true });
+        put('N18', data.propertyNo || '', { size: 11, bold: true, wrap: true });
+        put('O18', data.note || '', { font: KAI, wrap: true });
     }
     box(1, 17, 15, 24);
     thick(1, 17, 15, 24); thick(4, 17, 12, 24); thick(13, 18, 13, 24);
 
     // ---------- 簽章與說明 ----------
-    put('A26', ' 承辦人:', { bold: true, h: 'left', wrap: false });
-    put('G26', '主辦會計：', { bold: true, h: 'left', wrap: false });
-    put('K26', ' 基金主持人：', { bold: true, h: 'left', wrap: false });
+    put('A26', ' 承辦人:', { font: KAI, bold: true, h: 'left' });
+    put('G26', '主辦會計：', { font: KAI, bold: true, h: 'left' });
+    put('K26', ' 基金主持人：', { font: KAI, bold: true, h: 'left' });
+    put('A27', '填表說明：', { font: KAI, h: 'left' });
     [
-        '填表說明：',
         '1.本表應由承辦人員填列，經查倘有填報不實或未填報者，追究該人員責任。',
         '2.本表請附本府核定函影本，不同核定文號請分別填報，以利逐案控管經費。',
         '3.經費項目間之調整，請依各補助機關之規定及行政程序辦理。(註：涉及經、資門經費之調整，需獲得補助機關核定)',
@@ -227,9 +222,9 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
         '5.本表一式四份，請於活動辦理結束後二十日內查填，報送二份到府辦理核銷。正本2份留學校備查（1份由學校承辦人存查、1份學校主辦會計存查)、2份送縣府核銷結案(教育處、主計處各執1份）',
         '6.執行結果倘有剩餘，繳回教育處請依規定檢附資料(函文+支票)及相關文件繳回縣庫(受款人：臺東縣政府)，另不得挪為他用。',
         '7.如遇計畫同時包含『預撥及不預撥』情形，請-併填列『預撥欄位』及『不預撥之一次性結報欄位』。'
-    ].forEach(function (t, i) { put('A' + (27 + i), t, { bold: true, h: 'left', wrap: false }); });
-    put('O34', '第四次修正版', { bold: true, h: 'left', wrap: false });
-    put('P34', '114/06/26', { bold: true, h: 'left', wrap: false });
+    ].forEach(function (t, i) { put('A' + (28 + i), t, { font: KAI, bold: true, h: 'left' }); });
+    put('O34', '第四次修正版', { font: KAI, h: 'left' });
+    put('P34', '114/06/26', { font: KAI, h: 'left' });
     ws.pageSetup.printArea = 'A1:P34';
     return ws;
 }
@@ -276,7 +271,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 <body>
 
 <div class="container-fluid py-4" style="max-width: 1400px;" id="pcMainApp">
-    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.8</span></h3>
+    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.5.0</span></h3>
 
     <!-- 頁籤導覽列 (Tabs Header) -->
 <!-- 頁籤導覽列 (Tabs Header) -->
@@ -802,6 +797,22 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 					</span>
 				</div>			
 				
+				<!-- 📥 縣府附件結報表：改版偵測、讀取預填資料、填入原檔 -->
+				<div class="card border-info-subtle shadow-sm mb-4" id="countyFormCard">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+							<h6 class="fw-bold text-info-emphasis mb-0">📥 使用縣府核定公文所附的經費結報表（建議）</h6>
+							<span class="small text-secondary">系統內建格式：<span id="cfBuiltinVersion"></span></span>
+						</div>
+						<p class="small text-secondary mb-2">上傳縣府附件（.xls 或 .xlsx）。系統會：① 檢查縣府表格是否改版；② 讀取縣府已預填的資料供核對代入；③ 把本頁資料填進<b>縣府的原檔</b>讓您下載，格式永遠與縣府一致。</p>
+						<div class="d-flex align-items-center gap-2 flex-wrap">
+							<input type="file" id="cfFileInput" accept=".xls,.xlsx" class="form-control form-control-sm" style="max-width: 360px;">
+							<button class="btn btn-outline-info btn-sm fw-bold" id="btnCfReadPrefill" disabled>🔍 讀取縣府預填資料</button>
+							<button class="btn btn-info btn-sm fw-bold text-white" id="btnCfFill" disabled>⬇️ 填入縣府原檔並下載</button>
+						</div>
+						<div id="cfResult" class="small mt-2"></div>
+					</div>
+				</div>
                 <div class="row g-3 mb-4 p-3 bg-light rounded border align-items-center">
                     <div class="col-md-4">
                         <label class="form-label fw-bold small text-primary">📌 結報類型</label>
@@ -5680,6 +5691,7 @@ function pdfPrompt() {
         '規則：找不到的欄位文字填空字串、數字填 null，不要猜測或編造。金額一律換成阿拉伯數字，例如「新臺幣8萬9,000元整」填 89000。' +
         '若公文寫「經費來源為資本門」且沒有其他分項，approvedByCategory 的 equipment 填核定總金額、其餘填 0；若只寫經常門而沒有分項金額，四項都填 null。' +
         '子目代碼照公文寫法，例如「W15125」。事由用公文中的計畫名稱。' +
+        '附件若是經費概算表或分配表（例如住宿費、交通費、雜費、餐費、材料費、講座鐘點費等明細），這些屬於業務費，加總本校金額填入 business。' +
         (school ? '本校名稱為「' + school + '」；若公文附多校分配表，金額只取本校那一列。' : '') + '\n' +
         '使用繁體中文。';
 }
@@ -5883,6 +5895,17 @@ $(function () {
 <div class="modal fade" id="versionModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h5 class="modal-title fw-bold">📌 版本紀錄</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body small">
+    <h6 class="fw-bold text-primary">v4.5.0（2026-11-13）</h6>
+    <ul>
+      <li>「經費結報表」分頁新增「使用縣府核定公文所附的經費結報表」：上傳縣府附件（.xls／.xlsx）即可檢查表格是否改版、讀取縣府預填的子目代碼與核定金額，並把本頁資料直接填入縣府原檔下載（需 .xlsx）。</li>
+      <li>以標籤定位欄位，縣府表格增減列、欄仍能正確填寫；找不到的項目會列出請手動補上，不覆寫公式格。</li>
+      <li>偵測到縣府表格改版後，使用系統內建格式下載時會提醒。</li>
+    </ul>
+    <h6 class="fw-bold text-primary">v4.4.9（2026-11-13）</h6>
+    <ul>
+      <li>經費結報表 Excel 依縣府正式檔修正：子目編號改填在「2123-」右側獨立欄位、核定函日期文號改為「115年3月18日府教課字第…號函」連寫、勾選項文字改為「是／否」、分批結報欄名更正為 D=A-C，並套用正式檔的欄寬、列高與字型。</li>
+      <li>公文判讀：附件的經費概算表（住宿、交通、雜費等）會歸入業務費並只取本校金額。</li>
+    </ul>
     <h6 class="fw-bold text-primary">v4.4.8（2026-11-13）</h6>
     <ul>
       <li>發票辨識的配對碼會保留，重新整理或隔天開啟仍是同一組，按「更換配對碼」才會換。</li>
@@ -6379,6 +6402,311 @@ $(function () {
             miss.map(function (v) { return '#' + v.id + ' ' + (v.purpose || ''); }).join('、') + '。建議到憑證清單補上實際品項。', 'warning'); }, 3000);
     });
 });
+</script>
+<script>
+// ==========================================
+// 📥 縣府附件經費結報表：改版偵測、讀取預填、填入原檔
+// 以「找標籤」定位欄位，不寫死儲存格位置；不覆寫公式格
+// ==========================================
+var CF_BUILTIN = { label: '第四次修正版', date: '114/06/26' };
+var CF_SHEETJS_URL = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+
+function cfLoadSheetJS() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (window.__cfSheetJS) return window.__cfSheetJS;
+    window.__cfSheetJS = new Promise(function (ok, bad) {
+        var s = document.createElement('script');
+        s.src = CF_SHEETJS_URL;
+        s.onload = function () { window.XLSX ? ok(window.XLSX) : bad(new Error('讀取元件載入失敗')); };
+        s.onerror = function () { window.__cfSheetJS = null; bad(new Error('無法下載讀取 Excel 的元件，請確認網路。')); };
+        document.head.appendChild(s);
+    });
+    return window.__cfSheetJS;
+}
+function cfNorm(s) { return String(s === undefined || s === null ? '' : s).replace(/\s+/g, '').replace(/（/g, '(').replace(/）/g, ')'); }
+
+// ---------- 把工作表轉成可查詢的格子 ----------
+function cfGrid(XLSX, ws) {
+    var ref = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+    var merges = (ws['!merges'] || []).map(function (m) { return { r1: m.s.r, c1: m.s.c, r2: m.e.r, c2: m.e.c }; });
+    function cell(r, c) { return ws[XLSX.utils.encode_cell({ r: r, c: c })]; }
+    return {
+        maxR: ref.e.r, maxC: ref.e.c, merges: merges,
+        text: function (r, c) { var x = cell(r, c); if (!x) return ''; if (x.t === 's' && typeof x.v === 'string') return x.v; return String(x.w !== undefined ? x.w : (x.v !== undefined ? x.v : '')); },
+        value: function (r, c) { var x = cell(r, c); return x ? x.v : undefined; },
+        isFormula: function (r, c) { var x = cell(r, c); return !!(x && x.f); },
+        mergeOf: function (r, c) { for (var i = 0; i < merges.length; i++) { var m = merges[i]; if (r >= m.r1 && r <= m.r2 && c >= m.c1 && c <= m.c2) return m; } return { r1: r, c1: c, r2: r, c2: c }; },
+        find: function (pred, r1, r2, c1, c2) {
+            for (var r = r1 || 0; r <= Math.min(r2 === undefined ? this.maxR : r2, this.maxR); r++)
+                for (var c = c1 || 0; c <= Math.min(c2 === undefined ? this.maxC : c2, this.maxC); c++) {
+                    var t = cfNorm(this.text(r, c));
+                    if (t && pred(t, r, c)) return { r: r, c: c, t: t };
+                }
+            return null;
+        },
+        colWidth: function (c) { var cols = ws['!cols'] || []; var x = cols[c]; return x ? (x.wch || (x.wpx ? x.wpx / 7 : (x.width || 10))) : 10; },
+        rightOf: function (p) { var m = this.mergeOf(p.r, p.c); return { r: m.r1, c: m.c2 + 1 }; }
+    };
+}
+
+// ---------- 分析縣府表格結構 ----------
+function cfAnalyze(g) {
+    var A = { fields: {}, checks: {}, nonAdv: null, adv: null, missing: [], version: null };
+    function inc(s) { return function (t) { return t.indexOf(s) >= 0; }; }
+    function field(key, label, maxRow) {
+        var p = g.find(inc(label), 0, maxRow || 10);
+        if (!p) { A.missing.push(label); return; }
+        A.fields[key] = g.rightOf(p);
+    }
+    // 版本
+    var vp = g.find(function (t) { return /第.{1,3}次修正版/.test(t); });
+    if (vp) {
+        var date = '';
+        for (var c = vp.c + 1; c <= g.maxC && !date; c++) { var t = cfNorm(g.text(vp.r, c)); if (/^\d{2,3}\/\d{1,2}\/\d{1,2}$/.test(t)) date = t; }
+        A.version = { label: vp.t.match(/第.{1,3}次修正版/)[0], date: date };
+    }
+    field('schoolCode', '學校代碼'); field('schoolName', '學校名稱'); field('year', '所屬年度'); field('period', '計畫期程');
+    field('simpName', '簡化名稱'); field('dispatch', '函日期文號');
+    var sub = g.find(function (t) { return t.indexOf('子目編號') >= 0 || (t.indexOf('應付代收款') >= 0 && t.indexOf('代碼') >= 0); }, 0, 10);
+    if (sub) {
+        var pre = g.rightOf(sub);
+        if (/2123/.test(g.text(pre.r, pre.c))) {
+            A.fields.subPrefix = pre;
+            // 代碼格：「2123-」右側第一個已有內容的格；都空白時跳過太窄的欄（例如只有 7 字寬的間隔欄）
+            var start = g.rightOf(pre), pick = null;
+            for (var k = 0; k < 3 && !pick; k++) if (String(g.text(start.r, start.c + k)).trim()) pick = { r: start.r, c: start.c + k };
+            for (var k2 = 0; k2 < 3 && !pick; k2++) if (g.colWidth(start.c + k2) >= 9) pick = { r: start.r, c: start.c + k2 };
+            A.fields.subCode = pick || start;
+        }
+        else A.fields.subCode = pre;
+    } else A.missing.push('子目編號');
+
+    function chk(key, pred, label) { var p = g.find(function (t) { return /[□■]/.test(t) && pred(t); }, 0, 12); if (p) A.checks[key] = p; else A.missing.push(label); }
+    chk('type', function (t) { return t.indexOf('一次性結報') >= 0 && t.indexOf('分批結報') >= 0; }, '結報方式勾選');
+    chk('advance', function (t) { return t.indexOf('不預撥') >= 0; }, '預撥情形勾選');
+    chk('exec', function (t) { return t.indexOf('依計畫執行') >= 0; }, '依計畫執行勾選');
+    chk('property', function (t) { return t.indexOf('登帳') >= 0; }, '財產登帳勾選');
+    chk('adjust', function (t) { return t.indexOf('調整') >= 0; }, '經費調整勾選');
+
+    // 金額區塊
+    var rN = g.find(inc('(不預撥)經費類別')), rA = g.find(function (t) { return t.indexOf('(預撥)經費類別') >= 0 && t.indexOf('不預撥') < 0; });
+    function catRows(r1, r2) {
+        var rows = {};
+        [['personnel', '人事'], ['business', '業務費'], ['admin', '行政管理費'], ['equipment', '設備及投資']].forEach(function (x) {
+            var p = g.find(inc(x[1]), r1, r2, 0, 4); if (p) rows[x[0]] = p.r;
+        });
+        return rows;
+    }
+    function colIn(rows, c1, c2, pred) { for (var i = 0; i < rows.length; i++) { var p = g.find(pred, rows[i], rows[i], c1, c2); if (p) return p.c; } return null; }
+    if (rN) {
+        var hdr = [rN.r, rN.r + 1, rN.r + 2], end = rA ? rA.r - 1 : rN.r + 12;
+        var one = g.find(inc('一次性結報'), rN.r, rN.r + 1), bat = g.find(inc('分批結報'), rN.r, rN.r + 1);
+        var m1 = one ? g.mergeOf(one.r, one.c) : null, m2 = bat ? g.mergeOf(bat.r, bat.c) : null;
+        var B = { rows: catRows(rN.r + 1, end), cols: {} };
+        if (m1) {
+            B.cols.sApproved = colIn(hdr, m1.c1, m1.c2, inc('核定計畫金額'));
+            B.cols.sPaid = colIn(hdr, m1.c1, m1.c2, inc('撥付金額'));
+            B.cols.sActual = colIn(hdr, m1.c1, m1.c2, inc('實支金額'));
+        }
+        if (m2) {
+            B.cols.bApproved = colIn(hdr, m2.c1, m2.c2, inc('核定計畫金額'));
+            B.cols.bPrev = colIn(hdr, m2.c1, m2.c2, inc('(C1)'));
+            B.cols.bCurrent = colIn(hdr, m2.c1, m2.c2, inc('(C2)'));
+        }
+        B.cols.voucher = colIn(hdr, 0, g.maxC, inc('傳票號碼'));
+        B.cols.property = colIn(hdr, 0, g.maxC, inc('財產(物品)編號'));
+        B.cols.note = colIn(hdr, 0, g.maxC, function (t) { return t === '備註'; });
+        A.nonAdv = B;
+    } else A.missing.push('(不預撥)經費類別區塊');
+    if (rA) {
+        var hdrA = [rA.r, rA.r + 1];
+        var C = { rows: catRows(rA.r + 1, rA.r + 12), cols: {} };
+        C.cols.approved = colIn(hdrA, 0, g.maxC, inc('核定計畫金額'));
+        C.cols.advance = colIn(hdrA, 0, g.maxC, inc('預撥金額'));
+        C.cols.prev = colIn(hdrA, 0, g.maxC, function (t) { return t.indexOf('截至上期') >= 0 && t.indexOf('結報金額') >= 0; });
+        C.cols.current = colIn(hdrA, 0, g.maxC, inc('本期結報數'));
+        C.cols.returned = colIn(hdrA, 0, g.maxC, function (t) { return t.indexOf('已繳回') >= 0; });
+        C.cols.voucher = colIn(hdrA, 0, g.maxC, inc('傳票號碼'));
+        C.cols.property = colIn(hdrA, 0, g.maxC, inc('財產(物品)編號'));
+        C.cols.note = colIn(hdrA, 0, g.maxC, function (t) { return t === '備註'; });
+        A.adv = C;
+    } else A.missing.push('(預撥)經費類別區塊');
+    [['nonAdv', ['personnel', 'business', 'admin', 'equipment'], ['sApproved', 'sPaid', 'sActual', 'bApproved', 'bPrev', 'bCurrent']],
+     ['adv', ['personnel', 'business', 'admin', 'equipment'], ['approved', 'advance', 'prev', 'current', 'returned']]].forEach(function (x) {
+        var B = A[x[0]]; if (!B) return;
+        x[1].forEach(function (k) { if (B.rows[k] === undefined) A.missing.push((x[0] === 'adv' ? '預撥' : '不預撥') + '區塊「' + k + '」列'); });
+        x[2].forEach(function (k) { if (B.cols[k] === null || B.cols[k] === undefined) A.missing.push((x[0] === 'adv' ? '預撥' : '不預撥') + '區塊「' + k + '」欄'); });
+    });
+    return A;
+}
+
+// ---------- 勾選文字 ----------
+function cfSetChecks(text, chosen) {
+    var alias = { '否': ['否', '不是'], '不是': ['否', '不是'] };
+    var ok = alias[chosen] || [chosen];
+    return String(text).replace(/[□■](\s*)(不預撥|預撥|一次性結報|分批結報|不是|是|否|無)/g, function (all, sp, word) {
+        return (ok.indexOf(word) >= 0 ? '■' : '□') + sp + word;
+    });
+}
+function cfCheckedOption(text) { var m = /■\s*(不預撥|預撥|一次性結報|分批結報|不是|是|否|無)/.exec(String(text)); return m ? m[1] : ''; }
+
+// ---------- 主流程 ----------
+$(function () {
+    var cfFile = null, cfBuf = null, cfSheetName = '', cfInfo = null, cfGridObj = null;
+    $('#cfBuiltinVersion').text(CF_BUILTIN.label + '（' + CF_BUILTIN.date + '）');
+
+    function pickSheet(XLSX, wb) {
+        for (var i = 0; i < wb.SheetNames.length; i++) {
+            var ws = wb.Sheets[wb.SheetNames[i]], g = cfGrid(XLSX, ws);
+            if (g.find(function (t) { return t.indexOf('簡化方案') >= 0 && t.indexOf('結報表') >= 0; }, 0, 3)) return wb.SheetNames[i];
+        }
+        return null;
+    }
+    function report() {
+        var A = cfInfo, html = '';
+        if (!A.version) html += '<div class="alert alert-warning py-2 mb-2">⚠️ 找不到表格的版本字樣，無法確認是否改版，請人工確認。</div>';
+        else if (A.version.label === CF_BUILTIN.label && A.version.date === CF_BUILTIN.date)
+            html += '<div class="alert alert-success py-2 mb-2">✅ 縣府表格版本：' + aiEsc(A.version.label + ' ' + A.version.date) + '，與系統內建相同。</div>';
+        else html += '<div class="alert alert-danger py-2 mb-2">⚠️ <b>縣府表格已改版</b>：' + aiEsc(A.version.label + ' ' + A.version.date) +
+            '（系統內建為 ' + CF_BUILTIN.label + ' ' + CF_BUILTIN.date + '）。請使用「填入縣府原檔並下載」，不要用下方的「下載結報表」；並請通知系統維護者更新內建格式。</div>';
+        if (A.missing.length) html += '<div class="alert alert-warning py-2 mb-2">⚠️ 下列項目在縣府表格中找不到，填寫時會略過，請下載後手動補上：' + aiEsc(A.missing.join('、')) + '</div>';
+        if (!/\.xlsx$/i.test(cfFile.name)) html += '<div class="text-secondary">ℹ️ 這是舊式 .xls 檔，可以檢查版本與讀取預填資料。若要「填入縣府原檔」，請先用 Excel 開啟此檔，選「另存新檔 → Excel 活頁簿 (.xlsx)」，再上傳 .xlsx。</div>';
+        $('#cfResult').html(html);
+        try { localStorage.setItem('county_form_version', JSON.stringify(A.version || {})); } catch (e) { }
+    }
+
+    $('#cfFileInput').on('change', async function (e) {
+        cfFile = e.target.files[0]; cfInfo = null;
+        $('#btnCfReadPrefill, #btnCfFill').prop('disabled', true);
+        if (!cfFile) return;
+        $('#cfResult').html('<span class="text-secondary"><span class="spinner-border spinner-border-sm"></span> 分析縣府表格中…</span>');
+        try {
+            var XLSX = await cfLoadSheetJS();
+            cfBuf = await cfFile.arrayBuffer();
+            var wb = XLSX.read(cfBuf, { type: 'array', cellFormula: true, cellStyles: true });
+            cfSheetName = pickSheet(XLSX, wb);
+            if (!cfSheetName) throw new Error('檔案中找不到「簡化方案經費結報表」工作表。');
+            cfGridObj = cfGrid(XLSX, wb.Sheets[cfSheetName]);
+            cfInfo = cfAnalyze(cfGridObj);
+            report();
+            $('#btnCfReadPrefill').prop('disabled', false);
+            $('#btnCfFill').prop('disabled', !/\.xlsx$/i.test(cfFile.name));
+        } catch (err) {
+            $('#cfResult').html('<div class="alert alert-danger py-2 mb-0">❌ ' + aiEsc(err.message) + '</div>');
+        }
+    });
+
+    // ---------- 讀取縣府預填資料 → 核對視窗 ----------
+    $('#btnCfReadPrefill').on('click', function () {
+        var A = cfInfo, g = cfGridObj, F = A.fields;
+        function t(p) { return p ? String(g.text(p.r, p.c)).trim() : ''; }
+        function n(r, c) { if (r === undefined || c === null || c === undefined) return null; var v = g.value(r, c); return (typeof v === 'number') ? v : (String(v || '').trim() ? (parseFloat(String(v).replace(/,/g, '')) || null) : null); }
+        var data = { subItemCode: t(F.subCode), subItemName: t(F.simpName), year: t(F.year), period: t(F.period), approvedByCategory: {} };
+        var d = /(\d{2,3})年(\d{1,2})月(\d{1,2})日(.*?號)/.exec(t(F.dispatch));
+        if (d) { data.incomingDate = (+d[1] + 1911) + '-' + d[2] + '-' + d[3]; data.dispatchNo = d[4]; }
+        if (A.checks.advance) data.fundingMode = cfCheckedOption(g.text(A.checks.advance.r, A.checks.advance.c));
+        var B = A.nonAdv, C = A.adv;
+        ['personnel', 'business', 'admin', 'equipment'].forEach(function (k) {
+            var val = null;
+            if (B && B.rows[k] !== undefined) val = n(B.rows[k], B.cols.sApproved) || n(B.rows[k], B.cols.bApproved);
+            if (!val && C && C.rows[k] !== undefined) val = n(C.rows[k], C.cols.approved);
+            data.approvedByCategory[k] = val;
+        });
+        var sum = Object.values(data.approvedByCategory).reduce(function (s, x) { return s + (x || 0); }, 0);
+        if (sum) data.approvedAmt = sum;
+        data.notes = '以下資料讀自縣府附件「' + cfFile.name + '」' + (sum ? '，核定金額合計 ' + sum.toLocaleString() + ' 元' : '，未讀到核定金額') + '。';
+        showPdfConfirm(data);
+    });
+
+    // ---------- 填入縣府原檔 ----------
+    $('#btnCfFill').on('click', async function () {
+        if (!cfInfo || !/\.xlsx$/i.test(cfFile.name)) return;
+        var A = cfInfo, F = A.fields, g = cfGridObj;
+        var S = getSettlementFormData(), st = S.statusCheck || {}, cats = S.categories || {};
+        var $b = $(this).prop('disabled', true);
+        var skipped = [], formulas = [], written = 0;
+        try {
+            var wb = new ExcelJS.Workbook();
+            try { await wb.xlsx.load(cfBuf); }
+            catch (le) { throw new Error('這個 .xlsx 檔含有系統無法處理的物件（常見於表格中的說明圖片）。請用 Excel 開啟後「另存新檔」為 .xlsx 再試；若仍失敗，可先刪除表格下方的列印說明圖片再存檔。'); }
+            var ws = wb.getWorksheet(cfSheetName) || wb.worksheets.find(function (w) { return w.name.trim() === cfSheetName.trim(); });
+            if (!ws) throw new Error('找不到工作表「' + cfSheetName + '」。');
+            function set(p, val, label) {
+                if (!p) return;
+                if (g.isFormula(p.r, p.c)) { if (val !== null && val !== '' && val !== undefined && val !== 0) formulas.push(label); return; }
+                ws.getCell(p.r + 1, p.c + 1).value = (val === '' || val === undefined) ? null : val;
+                written++;
+            }
+            function v(id) { return String($('#' + id).val() || '').trim(); }
+            function roc(s) { var m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s || ''); return m ? (m[1] - 1911) + '年' + (+m[2]) + '月' + (+m[3]) + '日' : ''; }
+            var simp = v('simpCodeInput');
+            set(F.schoolCode, /^\d+$/.test(simp) ? Number(simp) : simp, '學校代碼');
+            set(F.schoolName, v('schoolShortNameInput') || v('schoolNameInput'), '學校名稱');
+            set(F.year, v('projYear'), '所屬年度');
+            set(F.period, v('projPeriod'), '計畫期程');
+            set(F.simpName, v('projSubItemName'), '簡化名稱');
+            if (F.subCode) set(F.subCode, F.subPrefix ? v('projSubItemCode') : (v('projSubItemCode') ? '2123-' + v('projSubItemCode') : ''), '子目編號');
+            var no = v('projDispatchNo');
+            if (no || v('projIncomingDate')) set(F.dispatch, roc(v('projIncomingDate')) + no + (no && !/函$/.test(no) ? '函' : ''), '核定函日期文號');
+
+            var type = S.settlementType || 'SINGLE';
+            var choose = { type: type === 'BATCH' ? '分批結報' : '一次性結報', advance: st.isAdvance || '不預撥', exec: st.execByPlan || '是',
+                           property: st.hasPropertyLog || '無', adjust: st.hasBudgetAdjust || '否' };
+            Object.keys(choose).forEach(function (k) {
+                var p = A.checks[k]; if (!p) return;
+                set(p, cfSetChecks(g.text(p.r, p.c), choose[k]), '勾選項');
+            });
+
+            var B = A.nonAdv, C = A.adv;
+            function money(block, cat, col, val, label) {
+                if (!block || block.rows[cat] === undefined || block.cols[col] === null || block.cols[col] === undefined) return;
+                set({ r: block.rows[cat], c: block.cols[col] }, val ? Number(val) : null, label);
+            }
+            ['personnel', 'business', 'admin', 'equipment'].forEach(function (k) {
+                var c = cats[k] || {};
+                var single = type === 'SINGLE', batch = type === 'BATCH', adv = type === 'ADVANCE';
+                money(B, k, 'sApproved', single ? c.approved : 0, '一次性核定金額');
+                money(B, k, 'sPaid', single ? c.currentAmount : 0, '一次性撥付金額');
+                money(B, k, 'sActual', single ? c.currentAmount : 0, '一次性實支金額');
+                money(B, k, 'bApproved', batch ? c.approved : 0, '分批核定金額');
+                money(B, k, 'bPrev', batch ? c.prevAmount : 0, '分批上期結報數');
+                money(B, k, 'bCurrent', batch ? c.currentAmount : 0, '分批本期結報數');
+                money(C, k, 'approved', adv ? c.approved : 0, '預撥核定金額');
+                money(C, k, 'advance', adv ? c.advance : 0, '預撥金額');
+                money(C, k, 'prev', adv ? c.prevAmount : 0, '預撥上期結報');
+                money(C, k, 'current', adv ? c.currentAmount : 0, '預撥本期結報');
+                money(C, k, 'returned', adv ? c.returnAmount : 0, '已繳回賸餘款');
+            });
+            var blk = type === 'ADVANCE' ? C : B;
+            if (blk) {
+                var firstRow = blk.rows.personnel !== undefined ? blk.rows.personnel : blk.rows.business;
+                [['voucher', S.voucherNo, '傳票號碼'], ['property', S.propertyNo, '財產編號'], ['note', S.note, '備註']].forEach(function (x) {
+                    if (blk.cols[x[0]] !== null && blk.cols[x[0]] !== undefined && firstRow !== undefined) set({ r: firstRow, c: blk.cols[x[0]] }, x[1] || '', x[2]);
+                });
+            }
+            wb.calcProperties = Object.assign({}, wb.calcProperties, { fullCalcOnLoad: true });
+            var out = await wb.xlsx.writeBuffer();
+            var name = cfFile.name.replace(/\.xlsx$/i, '') + '_已填寫.xlsx';
+            saveAs(new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), name);
+            var msg = '✅ 已填入 ' + written + ' 格並下載「' + name + '」。請用 Excel 開啟核對後再核章。';
+            if (skipped.length) msg += '<br>⚠️ 未填寫：' + aiEsc(skipped.filter(function (x, i, a) { return a.indexOf(x) === i; }).join('、'));
+            if (formulas.length) msg += '<br>ℹ️ 縣府表格以公式自動產生、系統未覆寫：' + aiEsc(formulas.filter(function (x, i, a) { return a.indexOf(x) === i; }).join('、')) + '。';
+            if (A.missing.length) msg += '<br>⚠️ 縣府表格中找不到：' + aiEsc(A.missing.join('、')) + '，請手動補上。';
+            $('#cfResult').append('<div class="alert alert-info py-2 mt-2 mb-0">' + msg + '</div>');
+        } catch (err) {
+            $('#cfResult').append('<div class="alert alert-danger py-2 mt-2 mb-0">❌ 填寫失敗：' + aiEsc(err.message) + '</div>');
+        } finally { $b.prop('disabled', false); }
+    });
+
+    // ---------- 用系統內建格式下載時，若曾偵測到縣府改版就提醒 ----------
+    $('#btnExportSettlementExcel').on('click', function () {
+        var ver = null; try { ver = JSON.parse(localStorage.getItem('county_form_version') || 'null'); } catch (e) { }
+        if (ver && ver.label && (ver.label !== CF_BUILTIN.label || ver.date !== CF_BUILTIN.date))
+            setTimeout(function () { showToast('⚠️ 您上次上傳的縣府結報表是「' + ver.label + ' ' + ver.date + '」，與系統內建格式不同，建議改用「填入縣府原檔」。', 'warning'); }, 2500);
+    });
+    window.__cf = { analyze: cfAnalyze, setChecks: cfSetChecks };
+});
+
 </script>
 </body>
 </html>
