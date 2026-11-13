@@ -2,10 +2,20 @@
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購憑證自動生成系統 v4.5.0</title>
+    <title>採購憑證自動生成系統 v4.5.1</title>
     <!-- CSS 資源 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <script>
+// 舊版發票匯入寫入的「設備及投資」統一改為系統使用的「設備與投資」
+(function () {
+    try {
+        var list = JSON.parse(localStorage.getItem('school_voucher_list') || '[]'), changed = false;
+        if (Array.isArray(list)) list.forEach(function (v) { if (v && v.category === '設備及投資') { v.category = '設備與投資'; changed = true; } });
+        if (changed) localStorage.setItem('school_voucher_list', JSON.stringify(list));
+    } catch (e) { }
+})();
+</script>
     <!-- JS 函式庫（公開 CDN） -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -15,7 +25,7 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <script>
-var APP_VERSION = 'v4.5.0', APP_BUILD = '2026-11-13';
+var APP_VERSION = 'v4.5.1', APP_BUILD = '2026-11-13';
 var DEFAULT_MOE_CODE = '144676';   // 預設學校：臺東縣金峰鄉嘉蘭國民小學
 </script>
     <!-- 1. 臺東縣學校資料庫（內建） -->
@@ -271,7 +281,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 <body>
 
 <div class="container-fluid py-4" style="max-width: 1400px;" id="pcMainApp">
-    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.5.0</span></h3>
+    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.5.1</span></h3>
 
     <!-- 頁籤導覽列 (Tabs Header) -->
 <!-- 頁籤導覽列 (Tabs Header) -->
@@ -5895,6 +5905,10 @@ $(function () {
 <div class="modal fade" id="versionModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h5 class="modal-title fw-bold">📌 版本紀錄</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body small">
+    <h6 class="fw-bold text-primary">v4.5.1（2026-11-13）</h6>
+    <ul>
+      <li>修正：「發票辨識」匯入時選「設備與投資」，憑證清單會誤顯示為「人事費」；已匯入的舊資料開啟時自動更正。</li>
+    </ul>
     <h6 class="fw-bold text-primary">v4.5.0（2026-11-13）</h6>
     <ul>
       <li>「經費結報表」分頁新增「使用縣府核定公文所附的經費結報表」：上傳縣府附件（.xls／.xlsx）即可檢查表格是否改版、讀取縣府預填的子目代碼與核定金額，並把本頁資料直接填入縣府原檔下載（需 .xlsx）。</li>
@@ -6332,7 +6346,7 @@ $(function () {
             '<th>品名</th><th style="width:60px;">單位</th><th style="width:50px;">數量</th><th style="width:70px;">單價</th><th style="width:80px;">小計</th></tr></thead><tbody>' + rows + '</tbody></table>' +
             '<details class="small text-muted"><summary>查看手機傳來的原始資料</summary><pre class="bg-light p-2 mb-0" style="white-space:pre-wrap;max-height:200px;overflow:auto;">' + e(JSON.stringify(d._raw, null, 2)) + '</pre></details>' +
             '<div class="d-flex justify-content-end gap-2 mt-2">' +
-            '<select class="form-select form-select-sm w-auto inv-cat" data-id="' + d._id + '"><option>業務費</option><option>人事費</option><option>行政管理費</option><option>設備及投資</option></select>' +
+            '<select class="form-select form-select-sm w-auto inv-cat" data-id="' + d._id + '"><option value="業務費">業務費</option><option value="人事費">人事費</option><option value="行政管理費">行政管理費</option><option value="設備與投資">設備與投資</option></select>' +
             '<button class="btn btn-sm btn-success fw-bold btn-direct-import" data-id="' + d._id + '">⬇️ 匯入憑證</button></div></div></div>';
     }
 
