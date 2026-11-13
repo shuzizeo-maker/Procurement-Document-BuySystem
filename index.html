@@ -2,7 +2,7 @@
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>採購憑證自動生成系統 v4.4.7</title>
+    <title>採購憑證自動生成系統 v4.4.8</title>
     <!-- CSS 資源 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <script>
-var APP_VERSION = 'v4.4.7', APP_BUILD = '2026-11-12';
+var APP_VERSION = 'v4.4.8', APP_BUILD = '2026-11-13';
 var DEFAULT_MOE_CODE = '144676';   // 預設學校：臺東縣金峰鄉嘉蘭國民小學
 </script>
     <!-- 1. 臺東縣學校資料庫（內建） -->
@@ -276,7 +276,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
 <body>
 
 <div class="container-fluid py-4" style="max-width: 1400px;" id="pcMainApp">
-    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.7</span></h3>
+    <h3 class="text-center mb-4 fw-bold text-primary">🏫 採購憑證自動生成系統 <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 align-middle" id="appVersionBadge" role="button" title="點擊查看版本紀錄" data-bs-toggle="modal" data-bs-target="#versionModal">v4.4.8</span></h3>
 
     <!-- 頁籤導覽列 (Tabs Header) -->
 <!-- 頁籤導覽列 (Tabs Header) -->
@@ -482,7 +482,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
                     <!-- 1. 手機辨識程式 QR Code -->
                     <div class="card p-3 shadow-sm border-primary-subtle mb-3 text-center">
                         <h5 class="fw-bold text-primary mb-1">📱 ① 手機掃碼開啟辨識程式</h5>
-                        <p class="small text-secondary mb-2">在手機的 Gemini 裡拍發票辨識，<b>不需要 API 金鑰</b>（需登入 Google 帳號）。</p>
+                        <p class="small text-secondary mb-2">在手機的 Gemini 裡拍發票辨識，<b>不需要 API 金鑰</b>（需登入 Google 帳號）。<br>只要掃一次：之後從 Gemini 左側的對話紀錄打開同一個程式即可，不必再掃。</p>
                         <div class="row g-2">
                             <div class="col-6 border-end">
                                 <div class="d-flex justify-content-center mb-2">
@@ -546,7 +546,7 @@ function renderSettlementSheetJS(workbook, data, currentSchool) {
                             <button class="btn btn-sm btn-outline-danger fw-bold" id="btnClearSyncList">🗑️ 清空列表</button>
                         </div>
                         <div class="alert alert-light border small py-2 mb-3">
-                            ℹ️ 發票資料會經過 Google Gemini 與公開推播服務 ntfy.sh 傳送。配對碼就是頻道密碼，請勿外流；每次使用請重新產生。匯入前請核對金額與品項。
+                            ℹ️ 發票資料會經過 Google Gemini 與公開推播服務 ntfy.sh 傳送。配對碼就是頻道密碼，請勿外流；配對碼會一直保留可重複使用，懷疑外流時請按「更換配對碼」。網頁關閉期間手機送出的發票，下次開啟時會自動補收（ntfy.sh 約保留 12 小時）。匯入前請核對金額與品項。
                         </div>
                         <div id="syncInvoiceList" style="max-height:700px;overflow-y:auto;padding-right:5px;">
                             <div class="text-center text-muted py-5" id="syncEmptyState">
@@ -5883,6 +5883,12 @@ $(function () {
 <div class="modal fade" id="versionModal" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
   <div class="modal-header"><h5 class="modal-title fw-bold">📌 版本紀錄</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
   <div class="modal-body small">
+    <h6 class="fw-bold text-primary">v4.4.8（2026-11-13）</h6>
+    <ul>
+      <li>發票辨識的配對碼會保留，重新整理或隔天開啟仍是同一組，按「更換配對碼」才會換。</li>
+      <li>網頁關閉期間手機送出的發票，下次開啟時自動補收（ntfy.sh 約保留 12 小時）；連線中斷重連後也會補收。</li>
+      <li>已接收但尚未匯入的發票卡片會保留，重新整理不會消失；已匯入的不會重複出現。</li>
+    </ul>
     <h6 class="fw-bold text-primary">v4.4.7（2026-11-12）</h6>
     <ul>
       <li>辨識到的規格與廠牌會自動填入品項表（金鑰辨識、Gemini 網頁、手機發票辨識皆適用），仍可手動修改。</li>
@@ -6147,40 +6153,68 @@ $(function () {
         $('#syncStatusBadge').attr('class', 'badge me-2 ' + cls).text(badge);
         $('#syncStatusText').attr('class', 'small fw-bold ' + (kind === 'ok' ? 'text-success' : kind === 'err' ? 'text-danger' : 'text-secondary')).text(text);
     }
+    // ---------- 保存：配對碼、已收訊息、待匯入卡片（重新整理或關閉網頁後可恢復） ----------
+    var SKEY = 'inv_sync_session', CKEY = 'inv_sync_cards', IKEY = 'inv_sync_seen';
+    function loadJSON(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; } catch (e) { return d; } }
+    function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+    function saveSession() { if (session) saveJSON(SKEY, { code: session.code, secure: session.secure, createdAt: session.createdAt, lastId: session.lastId || '' }); }
+    function saveCards() { saveJSON(CKEY, invoices.slice(-INV_MAX_PER_SESSION)); }
+    function saveSeen() { var ids = Object.keys(seenIds); saveJSON(IKEY, ids.slice(-500)); }
+    loadJSON(IKEY, []).forEach(function (id) { seenIds[id] = true; });
+
     function stop(msg) {
         if (es) { es.close(); es = null; }
         session = null;
+        try { localStorage.removeItem(SKEY); } catch (e) { }
         $('#syncCodeDisplayArea').hide();
+        $('#btnGenerateSyncCode').html('🔄 產生配對碼');
         setStatus('off', '未連線', msg || '尚未建立連線');
     }
 
-    $('#btnGenerateSyncCode').on('click', async function () {
-        if (es) es.close();
-        var secure = invSecure();
+    async function connect(saved) {
+        if (es) { es.close(); es = null; }
+        var secure = saved.secure, code = saved.code;
         if (secure && !(window.crypto && crypto.subtle)) { showToast('此瀏覽器環境不支援加密，請改用 https 網址開啟系統。', 'danger'); return; }
-        var code = invNewCode(secure);
         var topic = await invTopic(code, secure);
-        session = { code: code, secure: secure, key: secure ? await invKey(code) : null, topic: topic };
+        session = { code: code, secure: secure, key: secure ? await invKey(code) : null, topic: topic,
+                    createdAt: saved.createdAt || Math.floor(Date.now() / 1000), lastId: saved.lastId || '' };
+        saveSession();
         $('#syncCodeText').text(code);
         $('#syncCodeLabel').text(secure ? '🔒 加密配對碼（請在手機輸入，含不含「-」皆可）' : '配對碼（請在手機輸入）');
         $('#syncCodeDisplayArea').fadeIn();
-        setStatus('wait', '連線中', '正在建立連線…');
+        $('#btnGenerateSyncCode').html('🔄 更換配對碼');
+        // 補收：從上次收到的訊息之後開始；從未收過就從配對碼建立時開始（ntfy.sh 暫存約 12 小時）
+        var since = session.lastId || String(session.createdAt);
+        var resumed = !!saved.resumed;
+        setStatus('wait', '連線中', resumed ? '正在恢復連線並補收離線期間的發票…' : '正在建立連線…');
         try {
-            es = new EventSource('https://ntfy.sh/' + topic + '/sse');
+            es = new EventSource('https://ntfy.sh/' + topic + '/sse?since=' + encodeURIComponent(since));
             var mySession = session;
-            es.onopen = function () { if (session === mySession) setStatus('ok', '等待接收', '已就緒！請在手機輸入配對碼 ' + code); };
+            es.onopen = function () {
+                if (session !== mySession) return;
+                var old = (Date.now() / 1000 - mySession.createdAt) > 12 * 3600;
+                setStatus('ok', '等待接收', '已就緒！請在手機輸入配對碼 ' + code +
+                    (old ? '（此配對碼已使用超過 12 小時，期間若有漏收，ntfy.sh 可能已不保留）' : ''));
+            };
             es.onmessage = function (ev) {
                 if (session !== mySession) return;
                 var d; try { d = JSON.parse(ev.data); } catch (e) { return; }
-                if (d.event !== 'message' || !d.message || seenIds[d.id]) return;
-                seenIds[d.id] = true;
-                receive(d.message, mySession);
+                if (d.event !== 'message' || !d.message) return;
+                mySession.lastId = d.id; saveSession();
+                if (seenIds[d.id]) return;
+                seenIds[d.id] = true; saveSeen();
+                receive(d.message, mySession, d.id);
             };
-            es.onerror = function () { if (session === mySession) setStatus('err', '重新連線中', '連線中斷，系統會自動重試；若持續失敗請重新產生配對碼。'); };
-            showToast('📡 配對碼 ' + code + ' 已啟用，等待手機傳送。');
+            es.onerror = function () { if (session === mySession) setStatus('err', '重新連線中', '連線中斷，系統會自動重試並補收漏掉的發票。'); };
+            if (!resumed) showToast('📡 配對碼 ' + code + ' 已啟用，等待手機傳送。');
         } catch (e) {
             setStatus('err', '連線失敗', '無法建立連線，請確認網路或託管平台是否阻擋 ntfy.sh。');
         }
+    }
+
+    $('#btnGenerateSyncCode').on('click', function () {
+        if (session && !confirm('要更換配對碼嗎？\n更換後，手機要改輸入新的配對碼；用舊配對碼送出的發票將收不到。')) return;
+        connect({ code: invNewCode(invSecure()), secure: invSecure() });
     });
 
     // ---------- 接收與驗證 ----------
@@ -6216,7 +6250,7 @@ $(function () {
         return { invoice_number: str(pick(raw, ['invoice_number', 'invoiceNo', 'invoice_no', '發票號碼']), 20).toUpperCase().replace(/\s/g, ''),
                  invoice_date: date, purpose: purpose, total_amount: total, items: items, _filled: filled, _raw: raw };
     }
-    async function receive(message, sess) {
+    async function receive(message, sess, msgId) {
         try {
             var payload = JSON.parse(message);
             if (sess.secure) {
@@ -6228,17 +6262,30 @@ $(function () {
             var inv = sanitize(payload);
             inv._id = 'sync_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
             inv._sum = inv.items.reduce(function (s, it) { return s + it.subtotal; }, 0);
-            invoices.push(inv);
-            totalCount++; totalAmount += inv.total_amount;
-            $('#syncTotalCount').text(totalCount);
-            $('#syncTotalAmount').text(totalAmount.toLocaleString());
-            $('#syncEmptyState').hide();
-            $(card(inv)).hide().prependTo('#syncInvoiceList').fadeIn('slow');
+            inv._msgId = msgId || '';
+            inv._at = Date.now();
+            invoices.push(inv); saveCards();
+            showCard(inv, true);
             showToast('📥 收到發票：' + (inv.invoice_number || '（無號碼）') + '，NT$ ' + inv.total_amount.toLocaleString());
         } catch (e) {
             console.warn('發票資料無效：', e);
             showToast('⚠️ 收到無法辨識的資料（' + (e.message || '格式錯誤') + '），已略過。', 'warning');
         }
+    }
+    function showCard(inv, animate) {
+        totalCount++; totalAmount += inv.total_amount;
+        $('#syncTotalCount').text(totalCount);
+        $('#syncTotalAmount').text(totalAmount.toLocaleString());
+        $('#syncEmptyState').hide();
+        var $c = $(card(inv));
+        if (animate) $c.hide().prependTo('#syncInvoiceList').fadeIn('slow'); else $c.prependTo('#syncInvoiceList');
+        if (inv._isImported) markImported(inv._id, inv._voucherId);
+    }
+    function markImported(id, vid) {
+        $('.btn-direct-import[data-id="' + id + '"]').prop('disabled', true).removeClass('btn-success').addClass('btn-secondary').html('✅ 已匯入' + (vid ? '（#' + vid + '）' : ''));
+        $('.inv-cat[data-id="' + id + '"]').prop('disabled', true);
+        $('#badge_status_' + id).removeClass('bg-light text-primary').addClass('bg-success text-white').text('已收錄');
+        $('#card_' + id).removeClass('border-primary').addClass('border-success');
     }
     function card(d) {
         var e = aiEsc;
@@ -6284,21 +6331,25 @@ $(function () {
         });
         localStorage.setItem('school_voucher_list', JSON.stringify(list));
         if (typeof loadVoucherList === 'function') loadVoucherList();
-        inv._isImported = true;
-        $(this).prop('disabled', true).removeClass('btn-success').addClass('btn-secondary').html('✅ 已匯入');
-        $('.inv-cat[data-id="' + id + '"]').prop('disabled', true);
-        $('#badge_status_' + id).removeClass('bg-light text-primary').addClass('bg-success text-white').text('已收錄');
-        $('#card_' + id).removeClass('border-primary').addClass('border-success');
+        inv._isImported = true; inv._voucherId = nextId; saveCards();
+        markImported(id, nextId);
         showToast('✅ 已收錄至憑證清單（編號 ' + nextId + '），可到「憑證清單」編輯預算科目。');
     });
 
     $('#btnClearSyncList').on('click', function () {
-        if (!confirm('確定要清空已接收的發票列表嗎？（已匯入憑證清單的資料不受影響）')) return;
+        if (!confirm('確定要清空已接收的發票列表嗎？\n（已匯入憑證清單的資料不受影響；尚未匯入的發票會一併移除）')) return;
         $('#syncInvoiceList').find('.card').remove();
         $('#syncEmptyState').show();
-        totalCount = 0; totalAmount = 0; invoices = [];
+        totalCount = 0; totalAmount = 0; invoices = []; saveCards();
         $('#syncTotalCount').text(0); $('#syncTotalAmount').text(0);
     });
+    // ---------- 開啟網頁時恢復 ----------
+    loadJSON(CKEY, []).forEach(function (inv) { if (inv && inv._id && Array.isArray(inv.items)) { invoices.push(inv); showCard(inv, false); } });
+    var savedSession = loadJSON(SKEY, null);
+    if (savedSession && savedSession.code) {
+        if (!!savedSession.secure !== invSecure()) { try { localStorage.removeItem(SKEY); } catch (e) { } }
+        else { savedSession.resumed = true; connect(savedSession); }
+    }
     window.__invTest = { receive: function (m) { return receive(m, session); }, session: function () { return session; } };
 });
 
